@@ -28,7 +28,8 @@ public sealed class When_HandlingRegistration_WithValidRequest_Should
             "P@ssw0rd123!",
             Guid.CreateVersion7(),
             "Jane",
-            "Doe");
+            "Doe",
+            "tenant");
 
         validator.ValidateAsync(request, Arg.Any<CancellationToken>()).Returns(new ValidationResult());
         context.IdentityService.FindByEmailAsync(request.Email).Returns((AppUser?)null);

@@ -59,7 +59,8 @@ public sealed class WhenUnhandledExceptionIsThrown_Should(ContainersFixture fixt
                     Password,
                     _countryId,
                     WebApiIntegrationTestData.FirstName(),
-                    WebApiIntegrationTestData.LastName()));
+                    WebApiIntegrationTestData.LastName(),
+                    "tenant"));
 
             payload = await _response.Content.ReadFromJsonAsync<ProblemDetails>();
         }

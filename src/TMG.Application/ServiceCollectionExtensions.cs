@@ -16,6 +16,12 @@ using TMG.Application.Payments.Features.InitiatePayment;
 using TMG.Application.Payments.Features.ProcessCredoWebhook;
 using TMG.Application.Payments.Features.ProcessSafeHavenWebhook;
 using TMG.Application.Payments.Features.ReconcilePayments;
+using TMG.Application.Properties.Features.AddUnit;
+using TMG.Application.Properties.Features.CreateProperty;
+using TMG.Application.Properties.Features.ListProperties;
+using TMG.Application.Properties.Features.ListUnits;
+using TMG.Application.Properties.Features.SetUnitAvailability;
+using TMG.Application.Properties.Features.UpdateUnitRent;
 using TMG.Application.Providers.Features.ActivateProvider;
 using TMG.Application.ReferenceData.Features.GetCountries;
 using TMG.Application.Stakeholders.Features.UpdateProfile;
@@ -52,6 +58,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProcessSafeHavenVirtualAccountTransferWebhookHandler>();
         services.AddScoped<ProcessCredoWebhookHandler>();
         services.AddScoped<PaymentReconciliationService>();
+        services.AddScoped<CreatePropertyHandler>();
+        services.AddScoped<ListPropertiesHandler>();
+        services.AddScoped<AddUnitHandler>();
+        services.AddScoped<ListUnitsHandler>();
+        services.AddScoped<UpdateUnitRentHandler>();
+        services.AddScoped<SetUnitAvailabilityHandler>();
 
         return services;
     }

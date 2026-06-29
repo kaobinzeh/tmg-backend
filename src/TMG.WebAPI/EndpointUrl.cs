@@ -60,6 +60,21 @@ public static class EndpointUrl
         public static readonly string V1 = ToV1(Route);
     }
 
+    public static class Properties
+    {
+        public const string Route = $"api/{Versions.V1Route}/properties";
+        public static readonly string V1 = ToV1(Route);
+        public static string UnitsV1(Guid propertyId) => $"{V1}/{propertyId}/units";
+    }
+
+    public static class Units
+    {
+        public const string Route = $"api/{Versions.V1Route}/units";
+        public static readonly string V1 = ToV1(Route);
+        public static string RentV1(Guid unitId) => $"{V1}/{unitId}/rent";
+        public static string AvailabilityV1(Guid unitId) => $"{V1}/{unitId}/availability";
+    }
+
     public static class Payments
     {
         public const string Route = $"api/{Versions.V1Route}/payments";
