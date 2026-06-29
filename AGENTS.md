@@ -1,6 +1,6 @@
 # AGENTS
 
-This repository is a `.NET 10` backend template. Any agent working here should follow the conventions below.
+This repository is the `.NET 10` tenancy management core backend. Any agent working here should follow the conventions below.
 
 ## Verification
 

@@ -1,6 +1,6 @@
-# Backend Project Template
+# Tenancy Management Core Backend
 
-A .NET 10 backend starter organized around DDD boundaries, vertical slices in the application layer, modular schemas, Redis caching, a transactional outbox with RabbitMQ dispatching, OpenTelemetry, and containerized development dependencies.
+A .NET 10 tenancy management core backend organized around DDD boundaries, vertical slices in the application layer, modular schemas, Redis caching, a transactional outbox with RabbitMQ dispatching, OpenTelemetry, and containerized development dependencies.
 
 ## Included
 
@@ -32,42 +32,6 @@ A .NET 10 backend starter organized around DDD boundaries, vertical slices in th
 - WebAPI is only the presentation host and endpoint mapping layer
 - Schemas are separated by domain using `authentication` and `reference_data`
 - `TimeProvider` is the standard time abstraction used across handlers and infrastructure
-
-## Template Usage
-
-Install the template from the repository root:
-
-```powershell
-dotnet new install .
-```
-
-Create a new solution:
-
-```powershell
-dotnet new backend-template --organizationAbbreviation CN --clientName Acme --clientProjectName Ordering -o .\CN.Acme.Ordering
-```
-
-This creates a fresh project tree without the template repository's `.git` history.
-
-The generated root name becomes `{OrganizationAbbreviation}.{ClientName}.{ClientProjectName}` and is applied to the solution, projects, folders, and namespaces. The organization abbreviation is intended for short forms such as `CN` and should be at most 3 characters.
-
-If you want an interactive prompt instead of typing the parameters yourself, run:
-
-```powershell
-.\scripts\New-BackendProject.ps1
-```
-
-The script prompts for organization abbreviation, client name, and client project name, then installs the local template and creates the solution for you. If you leave organization blank, it defaults to `CN`.
-When `git` is available on `PATH`, the script also initializes a new repository in the generated project directory.
-
-There is also a bash version:
-
-```bash
-./scripts/New-BackendProject.sh
-```
-
-It supports the same inputs and generated naming convention.
-When `git` is available on `PATH`, it also initializes a new repository in the generated project directory.
 
 ## Local Development
 
@@ -135,7 +99,7 @@ After `docker compose up --build`, open Grafana at `http://localhost:3000` and u
 - `tmg.consumer`
 - `tmg.jobs`
 
-Default SQL Server credentials in the template:
+Default database credentials:
 
 - user: `sa`
 - password: `Your_strong_Password123!`
