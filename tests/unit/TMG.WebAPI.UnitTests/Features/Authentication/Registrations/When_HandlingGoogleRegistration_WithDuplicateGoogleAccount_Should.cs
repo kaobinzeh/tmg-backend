@@ -22,7 +22,7 @@ public sealed class When_HandlingGoogleRegistration_WithDuplicateGoogleAccount_S
         var context = new AuthenticationControllerTestContext();
         var validator = Substitute.For<IValidator<SignUpRequest>>();
         var googleValidator = Substitute.For<IValidator<GoogleSignUpRequest>>();
-        var request = new GoogleSignUpRequest("google-token", Guid.CreateVersion7(), "Jane", "Doe");
+        var request = new GoogleSignUpRequest("google-token", Guid.CreateVersion7(), "Jane", "Doe", "tenant");
 
         googleValidator.ValidateAsync(request, Arg.Any<CancellationToken>()).Returns(new ValidationResult());
         context.GoogleIdentityTokenService.ValidateAsync(request.IdToken, Arg.Any<CancellationToken>())

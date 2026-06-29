@@ -3,6 +3,7 @@ using TMG.Domain.Authentication.Entities;
 using TMG.Domain.Common.Messaging;
 using TMG.Domain.Notifications.Entities;
 using TMG.Domain.Payments.Entities;
+using TMG.Domain.Properties.Entities;
 using TMG.Domain.Providers.Entities;
 using TMG.Domain.ReferenceData.Entities;
 using TMG.Domain.Stakeholders.Entities;
@@ -41,6 +42,8 @@ public abstract class AppDbContextBase<TContext>(DbContextOptions<TContext> opti
     public DbSet<IpAddressLocation> IpAddressLocations => Set<IpAddressLocation>();
     public DbSet<LoginActivity> LoginActivities => Set<LoginActivity>();
     public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Property> Properties => Set<Property>();
+    public DbSet<Unit> Units => Set<Unit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
