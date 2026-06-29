@@ -1,0 +1,18 @@
+<div style="font-size:24px;font-weight:bold;line-height:1.2;text-align:center;color:#525252;margin-bottom:20px;">Thank you for your order</div>
+<div style="font-size:14px;line-height:22px;color:#525252;">Hi {{:FirstName:}},</div>
+<div style="font-size:14px;line-height:22px;color:#525252;margin-top:10px;">Your invoice is now available.</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:20px;border-collapse:collapse;color:#000;font-size:13px;line-height:22px;">
+  <tr style="border-bottom:1px solid #ecedee;text-align:left;">
+    <th style="padding:0 15px 10px 0;">Invoice</th>
+    <th style="padding:0 15px 10px 0;">Date</th>
+    <th style="padding:0 0 10px 15px;text-align:right;">Amount</th>
+  </tr>
+  <tr>
+    <td style="padding:8px 15px 8px 0;">{{:InvoiceNumber:}}</td>
+    <td style="padding:8px 15px 8px 0;">{{:InvoiceDate:}}</td>
+    <td style="padding:8px 0 8px 15px;text-align:right;">{{:Currency:}} {{:AmountDue:}}</td>
+  </tr>
+</table>
+<div style="text-align:center;margin-top:24px;">
+  <a href="{{:DownloadInvoiceUrl:}}" style="display:inline-block;background:#2F67F6;color:#ffffff;text-decoration:none;border-radius:3px;padding:15px 25px;font-size:15px;">Download Invoice</a>
+</div>

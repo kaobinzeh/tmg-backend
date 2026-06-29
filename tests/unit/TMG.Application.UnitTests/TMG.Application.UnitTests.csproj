@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TMG.Application.UnitTests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Domain\\TMG.Domain.csproj" />
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Application\\TMG.Application.csproj" />
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Infrastructure\\TMG.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

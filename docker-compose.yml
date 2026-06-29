@@ -1,0 +1,314 @@
+services:
+  database-migrator:
+    build:
+      context: .
+      dockerfile: src/TMG.DatabaseMigrator/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_PAT
+    environment:
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      GITHUB_PAT: ${GITHUB_PAT}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+    restart: "no"
+
+  webapi:
+    build:
+      context: .
+      dockerfile: src/TMG.WebAPI/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_PAT
+    environment:
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      GITHUB_PAT: ${GITHUB_PAT}
+      ASPNETCORE_ENVIRONMENT: Container
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__Redis: redis:6379
+      Jwt__Issuer: TMG
+      Jwt__Audience: TMG.Clients
+      Jwt__SigningKey: super-secret-template-signing-key-change-me
+      Notifications__Email__Mailtrap__WebhookSigningSecret: ${MAILTRAP_WEBHOOK_SIGNING_SECRET}
+      OpenTelemetry__ServiceName: TMG.WebAPI
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+      PYROSCOPE_APPLICATION_NAME: tmg.webapi
+      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      PYROSCOPE_PROFILING_ENABLED: "1"
+      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      CORECLR_ENABLE_PROFILING: "1"
+      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      LD_LIBRARY_PATH: /dotnet
+      DOTNET_EnableDiagnostics: "1"
+      DOTNET_EnableDiagnostics_IPC: "0"
+      DOTNET_EnableDiagnostics_Debugger: "0"
+      DOTNET_EnableDiagnostics_Profiler: "1"
+      Database__InitializeOnStartup: "false"
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+      pyroscope:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  consumer:
+    build:
+      context: .
+      dockerfile: src/TMG.Consumer/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_PAT
+    environment:
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      GITHUB_PAT: ${GITHUB_PAT}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__Redis: redis:6379
+      Messaging__RabbitMq__ServiceName: TMG.Consumer
+      Messaging__RabbitMq__HostName: rabbitmq
+      Messaging__RabbitMq__Port: 5672
+      Messaging__RabbitMq__UserName: guest
+      Messaging__RabbitMq__Password: guest
+      Messaging__RabbitMq__VirtualHost: /
+      Messaging__RabbitMq__EventsExchange: x.events.tmg
+      Messaging__RabbitMq__CommandsExchange: x.commands.tmg
+      Notifications__Email__Mailtrap__ApiToken: ${MAILTRAP_TOKEN}
+      OpenTelemetry__ServiceName: TMG.Consumer
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+      PYROSCOPE_APPLICATION_NAME: tmg.consumer
+      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      PYROSCOPE_PROFILING_ENABLED: "1"
+      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      CORECLR_ENABLE_PROFILING: "1"
+      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      LD_LIBRARY_PATH: /dotnet
+      DOTNET_EnableDiagnostics: "1"
+      DOTNET_EnableDiagnostics_IPC: "0"
+      DOTNET_EnableDiagnostics_Debugger: "0"
+      DOTNET_EnableDiagnostics_Profiler: "1"
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      pyroscope:
+        condition: service_started
+    ports:
+      - "8082:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  jobs:
+    build:
+      context: .
+      dockerfile: src/TMG.Jobs/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_PAT
+    environment:
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      GITHUB_PAT: ${GITHUB_PAT}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=TMGDb;Username=postgres;Password=postgres;
+      ConnectionStrings__Redis: redis:6379
+      Messaging__RabbitMq__ServiceName: TMG.Jobs
+      Messaging__RabbitMq__HostName: rabbitmq
+      Messaging__RabbitMq__Port: 5672
+      Messaging__RabbitMq__UserName: guest
+      Messaging__RabbitMq__Password: guest
+      Messaging__RabbitMq__VirtualHost: /
+      Messaging__RabbitMq__EventsExchange: x.events.tmg
+      Messaging__RabbitMq__CommandsExchange: x.commands.tmg
+      OpenTelemetry__ServiceName: TMG.Jobs
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+      PYROSCOPE_APPLICATION_NAME: tmg.jobs
+      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      PYROSCOPE_PROFILING_ENABLED: "1"
+      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      CORECLR_ENABLE_PROFILING: "1"
+      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      LD_LIBRARY_PATH: /dotnet
+      DOTNET_EnableDiagnostics: "1"
+      DOTNET_EnableDiagnostics_IPC: "0"
+      DOTNET_EnableDiagnostics_Debugger: "0"
+      DOTNET_EnableDiagnostics_Profiler: "1"
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      pyroscope:
+        condition: service_started
+    ports:
+      - "8083:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: TMGDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d TMGDb"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  rabbitscout:
+    image: ghcr.io/ralve-org/rabbitscout:latest
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 15672
+      RABBITMQ_PROTOCOL: http
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "3001:3000"
+
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  tempo:
+    image: grafana/tempo:2.8.1
+    command:
+      - -config.file=/etc/tempo.yml
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo.yml:ro
+    ports:
+      - "3200:3200"
+
+  loki:
+    image: grafana/loki:3.5.0
+    command:
+      - -config.file=/etc/loki/loki.yml
+    volumes:
+      - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
+    ports:
+      - "3100:3100"
+
+  pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - "4040:4040"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command:
+      - --config=/etc/otel-collector/config.yml
+    volumes:
+      - ./observability/otel-collector/otel-collector.yml:/etc/otel-collector/config.yml:ro
+    depends_on:
+      - tempo
+      - loki
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+      - pyroscope
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_PLUGINS_PREINSTALL_SYNC: grafana-pyroscope-app
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+
+secrets:
+  GITHUB_USERNAME:
+    environment: GITHUB_USERNAME
+  GITHUB_PAT:
+    environment: GITHUB_PAT

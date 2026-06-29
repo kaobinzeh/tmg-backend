@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TMG.Jobs.IntegrationTests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Chidelu.Integration.Messaging.RabbitMQ.Consumer" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
+    <PackageReference Include="Testcontainers.Redis" />
+    <PackageReference Include="WireMock.Net" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Jobs\\TMG.Jobs.csproj" />
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Contracts\\TMG.Contracts.csproj" />
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Domain\\TMG.Domain.csproj" />
+    <ProjectReference Include="..\\..\\..\\src\\TMG.Infrastructure\\TMG.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

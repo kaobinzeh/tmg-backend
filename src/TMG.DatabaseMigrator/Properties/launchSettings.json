@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TMG.DatabaseMigrator": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+using TMG.Domain.Common.Auditing;
+using TMG.Domain.Stakeholders.ReadModels;
+using TMG.WebAPI.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
+using Shouldly;
+
+namespace TMG.WebAPI.UnitTests;
+
+public sealed class When_ResolvingCurrentActor_WithMissingClientId_Should
+{
+    [Fact]
+    public async Task ReturnBadRequest()
+    {
+        var currentActorAccessor = Substitute.For<ICurrentActorAccessor>();
+        var stakeholderRepository = Substitute.For<IStakeholderReadModelRepository>();
+        var problemDetailsService = Substitute.For<IProblemDetailsService>();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Path = "/api/v1/test";
+
+        var nextWasCalled = false;
+        var sut = new CurrentActorMiddleware(_ =>
+        {
+            nextWasCalled = true;
+            return Task.CompletedTask;
+        });
+
+        await sut.InvokeAsync(httpContext, currentActorAccessor, stakeholderRepository, problemDetailsService);
+
+        nextWasCalled.ShouldBeFalse();
+        httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+        await problemDetailsService.Received(1).WriteAsync(Arg.Any<ProblemDetailsContext>());
+    }
+}

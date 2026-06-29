@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TMG.Application/TMG.Application.csproj" />
+    <Project Path="src/TMG.Consumer/TMG.Consumer.csproj" />
+    <Project Path="src/TMG.Contracts/TMG.Contracts.csproj" />
+    <Project Path="src/TMG.DatabaseMigrator/TMG.DatabaseMigrator.csproj" />
+    <Project Path="src/TMG.Domain/TMG.Domain.csproj" />
+    <Project Path="src/TMG.Infrastructure/TMG.Infrastructure.csproj" />
+    <Project Path="src/TMG.Jobs/TMG.Jobs.csproj" />
+    <Project Path="src/TMG.WebAPI/TMG.WebAPI.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/integration/">
+    <Project Path="tests/integration/TMG.Consumer.IntegrationTests/TMG.Consumer.IntegrationTests.csproj" />
+    <Project Path="tests/integration/TMG.Jobs.IntegrationTests/TMG.Jobs.IntegrationTests.csproj" />
+    <Project Path="tests/integration/TMG.WebAPI.IntegrationTests/TMG.WebAPI.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/unit/">
+    <Project Path="tests/unit/TMG.Application.UnitTests/TMG.Application.UnitTests.csproj" />
+    <Project Path="tests/unit/TMG.Consumer.UnitTests/TMG.Consumer.UnitTests.csproj" />
+    <Project Path="tests/unit/TMG.Domain.UnitTests/TMG.Domain.UnitTests.csproj" />
+    <Project Path="tests/unit/TMG.Infrastructure.UnitTests/TMG.Infrastructure.UnitTests.csproj" />
+    <Project Path="tests/unit/TMG.Jobs.UnitTests/TMG.Jobs.UnitTests.csproj" />
+    <Project Path="tests/unit/TMG.WebAPI.UnitTests/TMG.WebAPI.UnitTests.csproj" />
+  </Folder>
+</Solution>

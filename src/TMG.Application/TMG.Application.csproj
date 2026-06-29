@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TMG.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <ProjectReference Include="..\\TMG.Contracts\\TMG.Contracts.csproj" />
+    <ProjectReference Include="..\\TMG.Domain\\TMG.Domain.csproj" />
+  </ItemGroup>
+</Project>
