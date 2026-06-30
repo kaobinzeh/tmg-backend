@@ -7,6 +7,7 @@ using TMG.Domain.Properties.Entities;
 using TMG.Domain.Providers.Entities;
 using TMG.Domain.ReferenceData.Entities;
 using TMG.Domain.Stakeholders.Entities;
+using TMG.Domain.Tenancies.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,8 @@ public abstract class AppDbContextBase<TContext>(DbContextOptions<TContext> opti
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<Unit> Units => Set<Unit>();
+    public DbSet<Tenancy> Tenancies => Set<Tenancy>();
+    public DbSet<TenancyDocument> TenancyDocuments => Set<TenancyDocument>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

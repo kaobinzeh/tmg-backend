@@ -75,6 +75,16 @@ public static class EndpointUrl
         public static string AvailabilityV1(Guid unitId) => $"{V1}/{unitId}/availability";
     }
 
+    public static class Tenancies
+    {
+        public const string Route = $"api/{Versions.V1Route}/tenancies";
+        public static readonly string V1 = ToV1(Route);
+        public static readonly string AllocationsV1 = $"{V1}/allocations";
+        public static readonly string AcceptInvitationV1 = $"{V1}/accept-invitation";
+        public static readonly string RejectInvitationV1 = $"{V1}/reject-invitation";
+        public static readonly string DocumentsV1 = $"{V1}/documents";
+    }
+
     public static class Payments
     {
         public const string Route = $"api/{Versions.V1Route}/payments";
