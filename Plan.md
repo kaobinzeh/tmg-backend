@@ -84,7 +84,8 @@ WebAPI feature folder, routes in `EndpointUrl.cs`, handlers registered in `Appli
   1. Manager `AllocateUnit` → creates `Tenancy{Invited}`, reserves Unit, **auto-creates a pending tenant `AppUser` + `Stakeholder`** (type `tenant`) under the manager's `Client`.
   2. Publishes `UnitAllocated` → Consumer sends `UnitAllocationInvitation` email with an accept/activation link + token.
   3. Tenant opens link → accepts allocation → **reads & accepts T&C** → **sets password** (activates the pending account) → uploads ID + passport photo to object storage.
-- **Auth integration:** add an admin-initiated "create pending account" path + a token-based "accept invitation & set password" flow (model on the existing password-reset/OTP mechanics).
+  4. Because the tenant reached this flow via the link emailed to their address, **accepting also marks `EmailConfirmed = true`** on the AppUser (and the stakeholder verified) — no separate OTP confirmation step needed.
+- **Auth integration:** add an admin-initiated "create pending account" path + a token-based "accept invitation & set password & confirm email" flow (model on the existing password-reset/OTP mechanics).
 - **New:** `UnitAllocationInvitation` email template + Consumer handler `UnitAllocatedHandler`.
 - **WebAPI:** `TenanciesController` (allocate / accept-invitation / reject / upload-document).
 

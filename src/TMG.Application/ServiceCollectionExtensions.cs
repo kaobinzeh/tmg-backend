@@ -24,6 +24,10 @@ using TMG.Application.Properties.Features.SetUnitAvailability;
 using TMG.Application.Properties.Features.UpdateUnitRent;
 using TMG.Application.Providers.Features.ActivateProvider;
 using TMG.Application.ReferenceData.Features.GetCountries;
+using TMG.Application.Tenancies.Features.AcceptTenancyInvitation;
+using TMG.Application.Tenancies.Features.AllocateUnit;
+using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
+using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Application.Stakeholders.Features.UpdateProfile;
 using TMG.Application.Stakeholders.Features.UploadAvatar;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +68,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ListUnitsHandler>();
         services.AddScoped<UpdateUnitRentHandler>();
         services.AddScoped<SetUnitAvailabilityHandler>();
+        services.AddScoped<AllocateUnitHandler>();
+        services.AddScoped<AcceptTenancyInvitationHandler>();
+        services.AddScoped<RejectTenancyInvitationHandler>();
+        services.AddScoped<UploadTenancyDocumentHandler>();
 
         return services;
     }

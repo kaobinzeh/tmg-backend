@@ -10,4 +10,5 @@ public static class SchemaNames
     public const string Integration = "integration";
     public const string Payments = "payments";
     public const string Properties = "properties";
+    public const string Tenancies = "tenancies";
 }

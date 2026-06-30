@@ -1,6 +1,7 @@
 using TMG.Consumer.Authentication;
 using TMG.Consumer.Notifications;
 using TMG.Consumer.Payments;
+using TMG.Consumer.Tenancies;
 using TMG.Contracts.Commands.Payments;
 using TMG.Infrastructure.Messaging;
 using Chidelu.Integration.Messaging.RabbitMQ.Consumer;
@@ -14,6 +15,7 @@ using SuccessfulPaymentConfirmedEvent = TMG.Contracts.Events.SuccessfulPaymentCo
 using EmailDeliveryWebhookReceivedEvent = TMG.Contracts.Events.EmailDeliveryWebhookReceived;
 using UserSignInFailedEvent = TMG.Contracts.Events.UserSignInFailed;
 using UserSignInSuccessfulEvent = TMG.Contracts.Events.UserSignInSuccessful;
+using TenantInvitedEvent = TMG.Contracts.Events.TenantInvited;
 
 namespace TMG.Consumer;
 
@@ -68,7 +70,8 @@ public static class ServiceCollectionExtensions
                 .AddHandler<UserAccessTokenRefreshedEvent, UserAccessTokenRefreshedHandler>()
                 .AddHandler<UserSignInFailedEvent, UserSignInFailedHandler>()
                 .AddHandler<EmailDeliveryWebhookReceivedEvent, EmailDeliveryWebhookReceivedHandler>()
-                .AddHandler<SuccessfulPaymentConfirmedEvent, SuccessfulPaymentConfirmedHandler>())
+                .AddHandler<SuccessfulPaymentConfirmedEvent, SuccessfulPaymentConfirmedHandler>()
+                .AddHandler<TenantInvitedEvent, TenantInvitedHandler>())
             .AddConsumer(consumerConfig, builder => builder
                 .AddHandler<ResetPassword, ResetPasswordHandler>()
                 .AddHandler<SendNotification, SendNotificationHandler>()
