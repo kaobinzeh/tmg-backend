@@ -5,6 +5,7 @@ using TMG.Infrastructure.Messaging;
 using TMG.Infrastructure.Notifications;
 using TMG.Infrastructure.Observability;
 using TMG.Infrastructure.Persistence;
+using TMG.Infrastructure.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,7 @@ builder.Services.AddAuthenticationServices(builder.Configuration);
 builder.Services.AddRedisCaching(builder.Configuration);
 builder.Services.AddTransactionalOutbox();
 builder.Services.AddNotificationServices(builder.Configuration);
+builder.Services.AddObjectStorage(builder.Configuration);
 builder.Services.AddSubscribers(builder.Configuration);
 builder.Services.AddCustomTelemetryContext();
 builder.Services

@@ -6,7 +6,13 @@ public sealed record AllocateUnitRequest(
     Guid UnitId,
     string TenantEmail,
     string TenantFirstName,
-    string TenantLastName);
+    string TenantLastName,
+    DateTimeOffset? LeaseStartDate = null,
+    int? TermMonths = null);
+
+public sealed record ActivateTenancyRequest(
+    DateTimeOffset? LeaseStartDate = null,
+    int? TermMonths = null);
 
 public sealed record AcceptTenancyInvitationRequest(
     string Email,

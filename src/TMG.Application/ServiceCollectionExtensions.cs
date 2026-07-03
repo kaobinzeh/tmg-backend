@@ -25,7 +25,11 @@ using TMG.Application.Properties.Features.UpdateUnitRent;
 using TMG.Application.Providers.Features.ActivateProvider;
 using TMG.Application.ReferenceData.Features.GetCountries;
 using TMG.Application.Tenancies.Features.AcceptTenancyInvitation;
+using TMG.Application.Tenancies.Features.ActivateTenancy;
 using TMG.Application.Tenancies.Features.AllocateUnit;
+using TMG.Application.Tenancies.Features.GetTenancyCycle;
+using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
+using TMG.Application.Tenancies.Features.ProcessRentReminders;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
 using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Application.Stakeholders.Features.UpdateProfile;
@@ -70,6 +74,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SetUnitAvailabilityHandler>();
         services.AddScoped<AllocateUnitHandler>();
         services.AddScoped<AcceptTenancyInvitationHandler>();
+        services.AddScoped<ActivateTenancyHandler>();
+        services.AddScoped<GetTenancyCycleHandler>();
+        services.AddScoped<ListUpcomingRenewalsHandler>();
+        services.AddScoped<RentReminderService>();
         services.AddScoped<RejectTenancyInvitationHandler>();
         services.AddScoped<UploadTenancyDocumentHandler>();
 

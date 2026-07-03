@@ -7,4 +7,6 @@ public sealed record AllocateUnitCommand(
     string TenantEmail,
     string TenantFirstName,
     string TenantLastName,
-    ActorContext ActorContext);
+    ActorContext ActorContext,
+    DateTimeOffset? LeaseStartDate = null,
+    int? TermMonths = null);

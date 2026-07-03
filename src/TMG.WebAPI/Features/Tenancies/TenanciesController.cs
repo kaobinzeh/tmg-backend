@@ -1,7 +1,10 @@
 using Asp.Versioning;
 using FluentValidation;
 using TMG.Application.Tenancies.Features.AcceptTenancyInvitation;
+using TMG.Application.Tenancies.Features.ActivateTenancy;
 using TMG.Application.Tenancies.Features.AllocateUnit;
+using TMG.Application.Tenancies.Features.GetTenancyCycle;
+using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
 using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Domain.Common.Auditing;
@@ -20,6 +23,9 @@ public sealed class TenanciesController(
     AcceptTenancyInvitationHandler acceptTenancyInvitationHandler,
     RejectTenancyInvitationHandler rejectTenancyInvitationHandler,
     UploadTenancyDocumentHandler uploadTenancyDocumentHandler,
+    ActivateTenancyHandler activateTenancyHandler,
+    GetTenancyCycleHandler getTenancyCycleHandler,
+    ListUpcomingRenewalsHandler listUpcomingRenewalsHandler,
     IValidator<AllocateUnitRequest> allocateUnitValidator,
     IValidator<AcceptTenancyInvitationRequest> acceptValidator,
     IValidator<RejectTenancyInvitationRequest> rejectValidator,
@@ -48,7 +54,9 @@ public sealed class TenanciesController(
                 request.TenantEmail,
                 request.TenantFirstName,
                 request.TenantLastName,
-                ActorContext.FromCurrentActor(currentActor)),
+                ActorContext.FromCurrentActor(currentActor),
+                request.LeaseStartDate,
+                request.TermMonths),
             cancellationToken);
 
         return result.Status switch
@@ -168,6 +176,82 @@ public sealed class TenanciesController(
             UploadTenancyDocumentStatus.NoActiveTenancy => NotFound(),
             UploadTenancyDocumentStatus.InvalidFile => BadRequest(result.Error ?? "Invalid document file."),
             _ => Created(EndpointUrl.Tenancies.DocumentsV1, new UploadTenancyDocumentResponse(result.DocumentId!.Value))
+        };
+    }
+
+    [HttpPost("allocations/{tenancyId:guid}/activate")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ActivateTenancy(
+        Guid tenancyId,
+        [FromBody] ActivateTenancyRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await activateTenancyHandler.HandleAsync(
+            new ActivateTenancyCommand(
+                tenancyId,
+                ActorContext.FromCurrentActor(currentActor),
+                request.LeaseStartDate,
+                request.TermMonths),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ActivateTenancyStatus.NotAuthenticated => Unauthorized(),
+            ActivateTenancyStatus.TenancyNotFound => NotFound(),
+            ActivateTenancyStatus.MissingLeaseTerms => BadRequest(
+                "A lease start date and term (months) are required to activate the tenancy."),
+            ActivateTenancyStatus.NotAccepted => Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Tenancy not accepted",
+                detail: "The tenancy must be accepted by the tenant before its rent cycle can be activated."),
+            _ => NoContent()
+        };
+    }
+
+    [HttpGet("allocations/{tenancyId:guid}/cycle")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<TenancyCycleDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TenancyCycleDto>> GetCycle(
+        Guid tenancyId,
+        CancellationToken cancellationToken)
+    {
+        var result = await getTenancyCycleHandler.HandleAsync(
+            new GetTenancyCycleCommand(tenancyId, ActorContext.FromCurrentActor(currentActor)),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            GetTenancyCycleStatus.NotAuthenticated => Unauthorized(),
+            GetTenancyCycleStatus.TenancyNotFound => NotFound(),
+            _ => Ok(result.Cycle)
+        };
+    }
+
+    [HttpGet("allocations/upcoming-renewals")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<IReadOnlyList<UpcomingRenewalListItem>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IReadOnlyList<UpcomingRenewalListItem>>> ListUpcomingRenewals(
+        [FromQuery] int withinMonths,
+        CancellationToken cancellationToken)
+    {
+        var result = await listUpcomingRenewalsHandler.HandleAsync(
+            new ListUpcomingRenewalsCommand(
+                ActorContext.FromCurrentActor(currentActor),
+                withinMonths <= 0 ? 6 : withinMonths),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ListUpcomingRenewalsStatus.NotAuthenticated => Unauthorized(),
+            _ => Ok(result.Renewals)
         };
     }
 }
