@@ -9,6 +9,7 @@ using TMG.Jobs.Infrastructure.BackgroundServices;
 using TMG.Jobs.Observability;
 using TMG.Jobs.OutboxProcessing;
 using TMG.Jobs.Payments;
+using TMG.Jobs.RentReminders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +31,7 @@ builder.Services.AddRabbitMqOutboxDispatching(builder.Configuration);
 builder.Services.AddOutboxMessageProcessing(builder.Configuration);
 builder.Services.AddIpAddressLocationEnrichment(builder.Configuration);
 builder.Services.AddPaymentReconciliation(builder.Configuration);
+builder.Services.AddRentReminders(builder.Configuration);
 builder.Services.AddJobsHealthChecks();
 builder.Services.AddJobsOpenTelemetry(builder.Configuration);
 

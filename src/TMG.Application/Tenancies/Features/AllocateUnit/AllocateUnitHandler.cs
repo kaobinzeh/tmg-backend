@@ -99,7 +99,14 @@ public sealed class AllocateUnitHandler(
             tenantStakeholderId = existingStakeholder.Id;
         }
 
-        var tenancy = Tenancy.Invite(clientId, unit.PropertyId, unit.Id, tenantStakeholderId, command.TenantEmail);
+        var tenancy = Tenancy.Invite(
+            clientId,
+            unit.PropertyId,
+            unit.Id,
+            tenantStakeholderId,
+            command.TenantEmail,
+            command.LeaseStartDate,
+            command.TermMonths);
         await tenancyRepository.AddAsync(tenancy, cancellationToken);
 
         unit.MarkOccupied();

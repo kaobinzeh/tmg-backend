@@ -12,6 +12,7 @@ public enum NotificationType
     TrialExpired = 8,
     SubscriptionCancelled = 9,
     SubscriptionInvoice = 10,
-    UnitAllocationInvitation = 11
-
+    UnitAllocationInvitation = 11,
+    RentDueReminder3Months = 12,
+    RentDueReminder1Month = 13
 }

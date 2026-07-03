@@ -558,7 +558,9 @@ WITH template_values("NotificationType", "Description", "Subject", "TemplateFile
     (8, 'Trial expired notification', 'Your {{:Product:}} trial has ended', 'TrialExpired.html'),
     (9, 'Subscription cancelled notification', 'Help us improve {{:Product:}}', 'CancelledSubscription.html'),
     (10, 'Subscription invoice notification', 'Your invoice from {{:Product:}}', 'Invoice.html'),
-    (11, 'Unit allocation invitation notification', 'You have a new unit allocation', 'UnitAllocationInvitation.html')
+    (11, 'Unit allocation invitation notification', 'You have a new unit allocation', 'UnitAllocationInvitation.html'),
+    (12, 'Rent due reminder (3 months) notification', 'Your rent at {{:PropertyName:}} is due in 3 months', 'RentDueReminder3Months.html'),
+    (13, 'Rent due reminder (1 month) notification', 'Your rent at {{:PropertyName:}} is due in 1 month', 'RentDueReminder1Month.html')
 ),
 templates_existing AS (
     SELECT t."NotificationType"

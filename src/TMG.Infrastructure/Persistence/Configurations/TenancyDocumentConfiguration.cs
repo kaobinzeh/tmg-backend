@@ -16,7 +16,7 @@ public sealed class TenancyDocumentConfiguration : IEntityTypeConfiguration<Tena
         builder.Property(document => document.DocumentType).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(document => document.StorageKey).HasMaxLength(1024).IsRequired();
         builder.Property(document => document.ContentType).HasMaxLength(100).IsRequired();
-        builder.Property(document => document.UploadedByStakeholderId).IsRequired();
+        builder.Property(document => document.UploadedByStakeholderId);
 
         builder.HasIndex(document => document.TenancyId);
         builder.HasIndex(document => document.ClientId);

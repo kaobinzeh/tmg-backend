@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.Configure<EmailNotificationsOptions>(configuration.GetSection(EmailNotificationsOptions.SectionName));
         services.AddScoped<IEmailNotificationService, EmailNotificationDispatcher>();
         services.AddScoped<IEmailTransportProvider, MailtrapEmailTransportProvider>();
+        services.AddSingleton<INoticeLetterRenderer, NoticeLetterRenderer>();
 
         return services;
     }

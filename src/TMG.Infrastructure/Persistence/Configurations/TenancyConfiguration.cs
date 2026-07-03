@@ -21,5 +21,8 @@ public sealed class TenancyConfiguration : IEntityTypeConfiguration<Tenancy>
         builder.HasIndex(tenancy => tenancy.ClientId);
         builder.HasIndex(tenancy => tenancy.UnitId);
         builder.HasIndex(tenancy => tenancy.TenantStakeholderId);
+
+        // Supports the rent-reminder scan, which filters by Status and orders by NextRentDueUtc.
+        builder.HasIndex(tenancy => new { tenancy.Status, tenancy.NextRentDueUtc });
     }
 }

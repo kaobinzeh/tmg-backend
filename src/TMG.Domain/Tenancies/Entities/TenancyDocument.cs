@@ -17,7 +17,7 @@ public sealed class TenancyDocument : Entity, IAggregateRoot
         TenancyDocumentType documentType,
         string storageKey,
         string contentType,
-        Guid uploadedByStakeholderId)
+        Guid? uploadedByStakeholderId)
     {
         ClientId = clientId;
         TenancyId = tenancyId;
@@ -32,7 +32,9 @@ public sealed class TenancyDocument : Entity, IAggregateRoot
     public TenancyDocumentType DocumentType { get; private set; }
     public string StorageKey { get; private set; } = string.Empty;
     public string ContentType { get; private set; } = string.Empty;
-    public Guid UploadedByStakeholderId { get; private set; }
+
+    /// <summary>The stakeholder who uploaded the document, or null for system-generated documents (e.g. rent notices).</summary>
+    public Guid? UploadedByStakeholderId { get; private set; }
 
     public static TenancyDocument Create(
         Guid clientId,
@@ -40,7 +42,7 @@ public sealed class TenancyDocument : Entity, IAggregateRoot
         TenancyDocumentType documentType,
         string storageKey,
         string contentType,
-        Guid uploadedByStakeholderId) =>
+        Guid? uploadedByStakeholderId) =>
         new(clientId, tenancyId, documentType, storageKey, contentType, uploadedByStakeholderId);
 
     private static string Normalize(string value, string argumentName, int maxLength)

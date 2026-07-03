@@ -20,5 +20,9 @@ public sealed class AllocateUnitValidator : AbstractValidator<AllocateUnitReques
         RuleFor(request => request.TenantLastName)
             .NotEmpty()
             .MaximumLength(100);
+
+        RuleFor(request => request.TermMonths!.Value)
+            .GreaterThan(0)
+            .When(request => request.TermMonths.HasValue);
     }
 }

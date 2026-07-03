@@ -83,6 +83,9 @@ public static class EndpointUrl
         public static readonly string AcceptInvitationV1 = $"{V1}/accept-invitation";
         public static readonly string RejectInvitationV1 = $"{V1}/reject-invitation";
         public static readonly string DocumentsV1 = $"{V1}/documents";
+        public static readonly string UpcomingRenewalsV1 = $"{V1}/allocations/upcoming-renewals";
+        public static string ActivateV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/activate";
+        public static string CycleV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/cycle";
     }
 
     public static class Payments
