@@ -3,7 +3,6 @@ using TMG.Contracts.Events;
 using TMG.Domain.Common.Auditing;
 using TMG.Domain.Common.Messaging;
 using TMG.Domain.Common.Notifications;
-using TMG.Domain.Common.Storage;
 using TMG.Domain.Properties.Entities;
 using TMG.Domain.Stakeholders.ReadModels;
 using TMG.Domain.Tenancies.Entities;
@@ -15,6 +14,7 @@ namespace TMG.Application.UnitTests.Tenancies.RecordRentPayment;
 public sealed class When_RecordingRentPayment_Should
 {
     private static readonly DateTimeOffset CycleStart = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    private static readonly Guid ReceiptDocumentId = Guid.CreateVersion7();
 
     private sealed record Harness(
         RecordRentPaymentHandler Handler,
@@ -22,7 +22,7 @@ public sealed class When_RecordingRentPayment_Should
         Guid ClientId,
         Guid ManagerStakeholderId,
         IRepository<RentPayment> RentPaymentRepository,
-        IRepository<TenancyDocument> TenancyDocumentRepository,
+        IRentReceiptArchiver ReceiptArchiver,
         IEventPublisher EventPublisher,
         IUnitOfWork UnitOfWork);
 
@@ -57,7 +57,6 @@ public sealed class When_RecordingRentPayment_Should
         propertyRepository.GetByIdAsync(property.Id, Arg.Any<CancellationToken>()).Returns(property);
 
         var rentPaymentRepository = Substitute.For<IRepository<RentPayment>>();
-        var tenancyDocumentRepository = Substitute.For<IRepository<TenancyDocument>>();
 
         var stakeholderReadModelRepository = Substitute.For<IStakeholderReadModelRepository>();
         stakeholderReadModelRepository
@@ -66,23 +65,20 @@ public sealed class When_RecordingRentPayment_Should
                 tenancy.TenantStakeholderId, Guid.CreateVersion7(), "tenant@example.com", clientId,
                 Guid.CreateVersion7(), Guid.CreateVersion7(), "Tobi", "Ade", null, true));
 
-        var receiptRenderer = Substitute.For<IRentReceiptRenderer>();
-        receiptRenderer.Render(Arg.Any<RentReceiptModel>()).Returns("<html>receipt</html>");
-
-        var objectStorage = Substitute.For<IObjectStorageService>();
-        objectStorage
-            .UploadPrivateAsync(Arg.Any<ObjectStorageUploadRequest>(), Arg.Any<CancellationToken>())
-            .Returns("https://storage.example/receipt.html");
+        var receiptArchiver = Substitute.For<IRentReceiptArchiver>();
+        receiptArchiver
+            .ArchiveAsync(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<RentReceiptModel>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            .Returns(ReceiptDocumentId);
 
         var eventPublisher = Substitute.For<IEventPublisher>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
 
         var handler = new RecordRentPaymentHandler(
-            tenancyRepository, unitRepository, propertyRepository, rentPaymentRepository, tenancyDocumentRepository,
-            stakeholderReadModelRepository, receiptRenderer, objectStorage, eventPublisher, unitOfWork, TimeProvider.System);
+            tenancyRepository, unitRepository, propertyRepository, rentPaymentRepository,
+            stakeholderReadModelRepository, receiptArchiver, eventPublisher, unitOfWork, TimeProvider.System);
 
         return new Harness(handler, tenancy, clientId, managerStakeholderId,
-            rentPaymentRepository, tenancyDocumentRepository, eventPublisher, unitOfWork);
+            rentPaymentRepository, receiptArchiver, eventPublisher, unitOfWork);
     }
 
     private static RecordRentPaymentCommand Command(Harness harness, decimal amount = 1_500_000m) =>
@@ -103,16 +99,19 @@ public sealed class When_RecordingRentPayment_Should
 
         result.Status.ShouldBe(RecordRentPaymentStatus.Success);
         result.RentPaymentId.ShouldNotBeNull();
-        result.ReceiptDocumentId.ShouldNotBeNull();
+        result.ReceiptDocumentId.ShouldBe(ReceiptDocumentId);
 
         // The first payment settles the current term; the cycle is not advanced.
         harness.Tenancy.CycleEndUtc.ShouldBe(CycleStart.AddMonths(12));
 
         await harness.RentPaymentRepository.Received(1).AddAsync(
-            Arg.Is<RentPayment>(p => p.ReceiptDocumentId == result.ReceiptDocumentId && p.Amount == 1_500_000m),
+            Arg.Is<RentPayment>(p => p.ReceiptDocumentId == ReceiptDocumentId && p.Amount == 1_500_000m),
             Arg.Any<CancellationToken>());
-        await harness.TenancyDocumentRepository.Received(1).AddAsync(
-            Arg.Is<TenancyDocument>(d => d.DocumentType == TenancyDocumentType.Receipt),
+        await harness.ReceiptArchiver.Received(1).ArchiveAsync(
+            harness.ClientId,
+            harness.Tenancy.Id,
+            Arg.Any<RentReceiptModel>(),
+            harness.ManagerStakeholderId,
             Arg.Any<CancellationToken>());
         await harness.EventPublisher.Received(1).PublishAsync(
             Arg.Is<RentPaymentReceived>(e =>

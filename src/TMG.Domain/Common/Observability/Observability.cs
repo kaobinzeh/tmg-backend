@@ -95,6 +95,8 @@ public static class Observability
             public const string WalletCredited = "payment.wallet.credited";
             public const string CreditWallet = "payment.credit_wallet";
             public const string ActivateSubscription = "payment.activate_subscription";
+            public const string RecordRentPayment = "payment.record_rent_payment";
+            public const string RentPaymentRecorded = "payment.rent_payment.recorded";
         }
     }
 }

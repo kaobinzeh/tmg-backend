@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmailTransportProvider, MailtrapEmailTransportProvider>();
         services.AddSingleton<INoticeLetterRenderer, NoticeLetterRenderer>();
         services.AddSingleton<IRentReceiptRenderer, RentReceiptRenderer>();
+        services.AddScoped<IRentReceiptArchiver, RentReceiptArchiver>();
 
         return services;
     }
@@ -30,8 +31,9 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<EmailNotificationsOptions>(configuration.GetSection(EmailNotificationsOptions.SectionName));
         services.AddScoped<IMailtrapWebhookSignatureValidator, MailtrapWebhookSignatureValidator>();
-        // Rent receipts are rendered in-process by the RecordRentPayment handler (WebAPI host).
+        // Rent receipts are rendered + archived in-process by the RecordRentPayment handler (WebAPI host).
         services.AddSingleton<IRentReceiptRenderer, RentReceiptRenderer>();
+        services.AddScoped<IRentReceiptArchiver, RentReceiptArchiver>();
 
         return services;
     }

@@ -4,4 +4,5 @@ public sealed record InitiatePaymentRequest(
     decimal Amount,
     Guid CurrencyId,
     string PaymentIntent,
-    Guid PaymentProviderId);
+    Guid PaymentProviderId,
+    Guid? TenancyId = null);

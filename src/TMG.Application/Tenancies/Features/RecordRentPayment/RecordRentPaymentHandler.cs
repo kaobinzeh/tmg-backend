@@ -1,9 +1,7 @@
-using System.Text;
 using TMG.Contracts.Events;
 using TMG.Domain.Common.Messaging;
 using TMG.Domain.Common.Notifications;
 using TMG.Domain.Common.Persistence;
-using TMG.Domain.Common.Storage;
 using TMG.Domain.Properties.Entities;
 using TMG.Domain.Stakeholders.ReadModels;
 using TMG.Domain.Tenancies.Entities;
@@ -13,7 +11,7 @@ namespace TMG.Application.Tenancies.Features.RecordRentPayment;
 
 /// <summary>
 /// Manager-recorded (offline) rent payment: records the payment against the tenancy's rent cycle, rolls the
-/// cycle forward, renders a receipt into the per-unit document vault, and raises <see cref="RentPaymentReceived"/>
+/// cycle forward, archives a receipt in the per-unit document vault, and raises <see cref="RentPaymentReceived"/>
 /// (the Consumer emails the tenant their receipt).
 /// </summary>
 public sealed class RecordRentPaymentHandler(
@@ -21,10 +19,8 @@ public sealed class RecordRentPaymentHandler(
     IRepository<Unit> unitRepository,
     IRepository<Property> propertyRepository,
     IRepository<RentPayment> rentPaymentRepository,
-    IRepository<TenancyDocument> tenancyDocumentRepository,
     IStakeholderReadModelRepository stakeholderReadModelRepository,
-    IRentReceiptRenderer rentReceiptRenderer,
-    IObjectStorageService objectStorageService,
+    IRentReceiptArchiver rentReceiptArchiver,
     IEventPublisher eventPublisher,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider)
@@ -74,7 +70,6 @@ public sealed class RecordRentPaymentHandler(
             command.Reference,
             recordedByStakeholderId: stakeholderId);
 
-        var receiptNumber = BuildReceiptNumber(rentPayment.Id);
         var tenant = await stakeholderReadModelRepository.GetByStakeholderIdAsync(tenancy.TenantStakeholderId, cancellationToken);
         var tenantName = tenant is null
             ? tenancy.InvitedEmail
@@ -83,36 +78,24 @@ public sealed class RecordRentPaymentHandler(
         var unitLabel = unit?.Label ?? string.Empty;
         var propertyName = property?.Name ?? string.Empty;
 
-        // Render + archive the receipt in the per-unit vault, then link it to the payment ledger entry.
-        var receiptHtml = rentReceiptRenderer.Render(new RentReceiptModel(
-            receiptNumber,
-            tenantName,
-            propertyName,
-            unitLabel,
-            command.Amount,
-            paidAtUtc,
-            period.StartUtc,
-            period.EndUtc,
-            DescribeMethod(command.Method),
-            command.Reference));
-
-        var objectKey =
-            $"tenants/{clientId}/tenancies/{tenancy.Id}/documents/receipt/{Guid.CreateVersion7():N}.html";
-        using var receiptStream = new MemoryStream(Encoding.UTF8.GetBytes(receiptHtml));
-        var storageKey = await objectStorageService.UploadPrivateAsync(
-            new ObjectStorageUploadRequest(objectKey, receiptStream, "text/html"),
-            cancellationToken);
-
-        var document = TenancyDocument.Create(
+        var receiptDocumentId = await rentReceiptArchiver.ArchiveAsync(
             clientId,
             tenancy.Id,
-            TenancyDocumentType.Receipt,
-            storageKey,
-            "text/html",
-            uploadedByStakeholderId: stakeholderId);
-        await tenancyDocumentRepository.AddAsync(document, cancellationToken);
+            new RentReceiptModel(
+                rentPayment.ReceiptNumber,
+                tenantName,
+                propertyName,
+                unitLabel,
+                command.Amount,
+                paidAtUtc,
+                period.StartUtc,
+                period.EndUtc,
+                command.Method.ToDisplayName(),
+                command.Reference),
+            uploadedByStakeholderId: stakeholderId,
+            cancellationToken);
 
-        rentPayment.AttachReceipt(document.Id);
+        rentPayment.AttachReceipt(receiptDocumentId);
         await rentPaymentRepository.AddAsync(rentPayment, cancellationToken);
 
         await eventPublisher.PublishAsync(
@@ -122,7 +105,7 @@ public sealed class RecordRentPaymentHandler(
                 UnitId = tenancy.UnitId,
                 PropertyId = tenancy.PropertyId,
                 RentPaymentId = rentPayment.Id,
-                ReceiptNumber = receiptNumber,
+                ReceiptNumber = rentPayment.ReceiptNumber,
                 Amount = command.Amount,
                 CurrencyId = rentPayment.CurrencyId,
                 PaidAtUtc = paidAtUtc,
@@ -138,18 +121,6 @@ public sealed class RecordRentPaymentHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new RecordRentPaymentResult(RecordRentPaymentStatus.Success, rentPayment.Id, document.Id);
+        return new RecordRentPaymentResult(RecordRentPaymentStatus.Success, rentPayment.Id, receiptDocumentId);
     }
-
-    private static string BuildReceiptNumber(Guid rentPaymentId) =>
-        $"RCPT-{rentPaymentId.ToString("N")[..8].ToUpperInvariant()}";
-
-    private static string DescribeMethod(RentPaymentMethod method) => method switch
-    {
-        RentPaymentMethod.BankTransfer => "Bank transfer",
-        RentPaymentMethod.Cash => "Cash",
-        RentPaymentMethod.Cheque => "Cheque",
-        RentPaymentMethod.Card => "Card",
-        _ => "Other"
-    };
 }

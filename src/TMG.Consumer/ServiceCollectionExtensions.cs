@@ -80,7 +80,8 @@ public static class ServiceCollectionExtensions
                 .AddHandler<ResetPassword, ResetPasswordHandler>()
                 .AddHandler<SendNotification, SendNotificationHandler>()
                 .AddHandler<CreditWalletCommand, CreditWalletHandler>()
-                .AddHandler<ActivateSubscriptionCommand, ActivateSubscriptionHandler>())
+                .AddHandler<ActivateSubscriptionCommand, ActivateSubscriptionHandler>()
+                .AddHandler<RecordRentPaymentCommand, RecordRentPaymentHandler>())
             .AddHostedService(serviceProvider => new Worker(
                 serviceProvider.GetRequiredKeyedService<ISubscriber>(subscriberConfig.Key),
                 serviceProvider.GetRequiredKeyedService<IConsumer>(consumerConfig.Key),

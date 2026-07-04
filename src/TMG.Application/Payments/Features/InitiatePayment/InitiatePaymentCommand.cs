@@ -9,4 +9,5 @@ public sealed record InitiatePaymentCommand(
     Guid CurrencyId,
     PaymentIntent PaymentIntent,
     Guid PaymentProviderId,
-    ActorContext ActorContext);
+    ActorContext ActorContext,
+    Guid? TenancyId = null);

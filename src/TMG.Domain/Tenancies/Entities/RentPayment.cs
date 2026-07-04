@@ -27,7 +27,8 @@ public sealed class RentPayment : Entity, IAggregateRoot
         DateTimeOffset periodEndUtc,
         RentPaymentMethod method,
         string? reference,
-        Guid? recordedByStakeholderId)
+        Guid? recordedByStakeholderId,
+        Guid? paymentTransactionId)
     {
         if (amount <= 0)
         {
@@ -46,6 +47,7 @@ public sealed class RentPayment : Entity, IAggregateRoot
         Method = method;
         Reference = NormalizeOptional(reference, nameof(reference), MaxReferenceLength);
         RecordedByStakeholderId = recordedByStakeholderId;
+        PaymentTransactionId = paymentTransactionId;
     }
 
     public Guid ClientId { get; private set; }
@@ -68,8 +70,14 @@ public sealed class RentPayment : Entity, IAggregateRoot
     /// <summary>The manager who recorded the payment, or null for a system-recorded (in-app) payment.</summary>
     public Guid? RecordedByStakeholderId { get; private set; }
 
+    /// <summary>The gateway payment transaction this ledger entry settled, or null for a manager-recorded offline payment.</summary>
+    public Guid? PaymentTransactionId { get; private set; }
+
     /// <summary>The generated receipt document in the vault, once it has been rendered and stored.</summary>
     public Guid? ReceiptDocumentId { get; private set; }
+
+    /// <summary>Human-readable receipt number derived from the ledger id, e.g. <c>RCPT-01AB23CD</c>.</summary>
+    public string ReceiptNumber => $"RCPT-{Id.ToString("N")[..8].ToUpperInvariant()}";
 
     public static RentPayment Record(
         Guid clientId,
@@ -82,9 +90,10 @@ public sealed class RentPayment : Entity, IAggregateRoot
         RentPeriod period,
         RentPaymentMethod method,
         string? reference,
-        Guid? recordedByStakeholderId) =>
+        Guid? recordedByStakeholderId,
+        Guid? paymentTransactionId = null) =>
         new(clientId, tenancyId, unitId, propertyId, amount, currencyId, paidAtUtc,
-            period.StartUtc, period.EndUtc, method, reference, recordedByStakeholderId);
+            period.StartUtc, period.EndUtc, method, reference, recordedByStakeholderId, paymentTransactionId);
 
     public void AttachReceipt(Guid receiptDocumentId) => ReceiptDocumentId = receiptDocumentId;
 
