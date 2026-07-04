@@ -21,6 +21,12 @@ internal sealed class ObjectStorageService(
         return await provider.UploadPrivateAsync(request, cancellationToken);
     }
 
+    public async Task<string> GetSignedDownloadUrlAsync(string storageKey, DateTimeOffset expiresAtUtc, CancellationToken cancellationToken)
+    {
+        var provider = await ResolveProviderAsync(cancellationToken);
+        return await provider.GetSignedDownloadUrlAsync(storageKey, expiresAtUtc, cancellationToken);
+    }
+
     private async Task<IObjectStorageProvider> ResolveProviderAsync(CancellationToken cancellationToken)
     {
         var activeProvider = await providerRepository.FirstOrDefaultAsync(

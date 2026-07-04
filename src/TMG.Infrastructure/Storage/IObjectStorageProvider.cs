@@ -8,4 +8,5 @@ internal interface IObjectStorageProvider
 
     Task<string> UploadPublicAsync(ObjectStorageUploadRequest request, CancellationToken cancellationToken);
     Task<string> UploadPrivateAsync(ObjectStorageUploadRequest request, CancellationToken cancellationToken);
+    Task<string> GetSignedDownloadUrlAsync(string storageKey, DateTimeOffset expiresAtUtc, CancellationToken cancellationToken);
 }

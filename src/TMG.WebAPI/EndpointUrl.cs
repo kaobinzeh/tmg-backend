@@ -87,6 +87,8 @@ public static class EndpointUrl
         public static string ActivateV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/activate";
         public static string CycleV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/cycle";
         public static string PaymentsV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/payments";
+        public static string DocumentsForTenancyV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/documents";
+        public static string DocumentDownloadUrlV1(Guid documentId) => $"{V1}/documents/{documentId}/download-url";
     }
 
     public static class Payments

@@ -27,7 +27,10 @@ using TMG.Application.ReferenceData.Features.GetCountries;
 using TMG.Application.Tenancies.Features.AcceptTenancyInvitation;
 using TMG.Application.Tenancies.Features.ActivateTenancy;
 using TMG.Application.Tenancies.Features.AllocateUnit;
+using TMG.Application.Tenancies;
 using TMG.Application.Tenancies.Features.GetTenancyCycle;
+using TMG.Application.Tenancies.Features.GetTenancyDocumentDownloadUrl;
+using TMG.Application.Tenancies.Features.ListTenancyDocuments;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Application.Tenancies.Features.ProcessRentReminders;
 using TMG.Application.Tenancies.Features.RecordRentPayment;
@@ -82,6 +85,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RejectTenancyInvitationHandler>();
         services.AddScoped<UploadTenancyDocumentHandler>();
         services.AddScoped<RecordRentPaymentHandler>();
+        services.AddScoped<TenancyDocumentAccessGuard>();
+        services.AddScoped<ListTenancyDocumentsHandler>();
+        services.AddScoped<GetTenancyDocumentDownloadUrlHandler>();
 
         return services;
     }
