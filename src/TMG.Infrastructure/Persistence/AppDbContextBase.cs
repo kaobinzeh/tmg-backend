@@ -47,6 +47,7 @@ public abstract class AppDbContextBase<TContext>(DbContextOptions<TContext> opti
     public DbSet<Unit> Units => Set<Unit>();
     public DbSet<Tenancy> Tenancies => Set<Tenancy>();
     public DbSet<TenancyDocument> TenancyDocuments => Set<TenancyDocument>();
+    public DbSet<RentPayment> RentPayments => Set<RentPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

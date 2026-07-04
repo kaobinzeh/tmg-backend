@@ -14,5 +14,6 @@ public enum NotificationType
     SubscriptionInvoice = 10,
     UnitAllocationInvitation = 11,
     RentDueReminder3Months = 12,
-    RentDueReminder1Month = 13
+    RentDueReminder1Month = 13,
+    RentPaymentReceipt = 14
 }

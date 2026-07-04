@@ -5,6 +5,7 @@ using TMG.Application.Tenancies.Features.ActivateTenancy;
 using TMG.Application.Tenancies.Features.AllocateUnit;
 using TMG.Application.Tenancies.Features.GetTenancyCycle;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
+using TMG.Application.Tenancies.Features.RecordRentPayment;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
 using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Domain.Common.Auditing;
@@ -24,11 +25,13 @@ public sealed class TenanciesController(
     RejectTenancyInvitationHandler rejectTenancyInvitationHandler,
     UploadTenancyDocumentHandler uploadTenancyDocumentHandler,
     ActivateTenancyHandler activateTenancyHandler,
+    RecordRentPaymentHandler recordRentPaymentHandler,
     GetTenancyCycleHandler getTenancyCycleHandler,
     ListUpcomingRenewalsHandler listUpcomingRenewalsHandler,
     IValidator<AllocateUnitRequest> allocateUnitValidator,
     IValidator<AcceptTenancyInvitationRequest> acceptValidator,
     IValidator<RejectTenancyInvitationRequest> rejectValidator,
+    IValidator<RecordRentPaymentRequest> recordRentPaymentValidator,
     ICurrentActor currentActor) : ControllerBase
 {
     [HttpPost("allocations")]
@@ -210,6 +213,49 @@ public sealed class TenanciesController(
                 title: "Tenancy not accepted",
                 detail: "The tenancy must be accepted by the tenant before its rent cycle can be activated."),
             _ => NoContent()
+        };
+    }
+
+    [HttpPost("allocations/{tenancyId:guid}/payments")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<RecordRentPaymentResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<RecordRentPaymentResponse>> RecordRentPayment(
+        Guid tenancyId,
+        [FromBody] RecordRentPaymentRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validationResult = await recordRentPaymentValidator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ValidationProblemDetails(validationResult.ToValidationDictionary()));
+        }
+
+        var result = await recordRentPaymentHandler.HandleAsync(
+            new RecordRentPaymentCommand(
+                tenancyId,
+                request.Amount,
+                request.Method,
+                ActorContext.FromCurrentActor(currentActor),
+                request.Reference,
+                request.PaidAtUtc),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            RecordRentPaymentStatus.NotAuthenticated => Unauthorized(),
+            RecordRentPaymentStatus.TenancyNotFound => NotFound(),
+            RecordRentPaymentStatus.InvalidAmount => BadRequest("The rent payment amount must be greater than zero."),
+            RecordRentPaymentStatus.NotActive => Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Tenancy not active",
+                detail: "The tenancy must have an active rent cycle before a payment can be recorded."),
+            _ => Created(
+                EndpointUrl.Tenancies.PaymentsV1(tenancyId),
+                new RecordRentPaymentResponse(result.RentPaymentId!.Value, result.ReceiptDocumentId))
         };
     }
 
