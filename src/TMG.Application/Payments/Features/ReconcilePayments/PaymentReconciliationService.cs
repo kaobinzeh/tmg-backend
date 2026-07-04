@@ -77,6 +77,7 @@ public sealed class PaymentReconciliationService(
                             PaymentProviderId = transaction.PaymentProviderId,
                             Amount = transaction.Amount,
                             CurrencyId = transaction.CurrencyId,
+                            TenancyId = transaction.TenancyId,
                             StakeholderId = transaction.StakeholderId,
                             ClientId = transaction.ClientId,
                             FlowId = string.Empty,

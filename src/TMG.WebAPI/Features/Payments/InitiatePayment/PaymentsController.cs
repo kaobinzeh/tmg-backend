@@ -40,7 +40,8 @@ public sealed class PaymentsController(
                 request.CurrencyId,
                 paymentIntent,
                 request.PaymentProviderId,
-                ActorContext.FromCurrentActor(currentActor)),
+                ActorContext.FromCurrentActor(currentActor),
+                request.TenancyId),
             cancellationToken);
 
         return Ok(new InitiatePaymentResponse(

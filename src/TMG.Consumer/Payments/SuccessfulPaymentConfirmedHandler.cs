@@ -73,6 +73,38 @@ public sealed class SuccessfulPaymentConfirmedHandler(
                         }));
                 break;
 
+            case PaymentIntent.RentPayment:
+                if (message.TenancyId is not { } tenancyId)
+                {
+                    throw new CannotProcessMessageNonTransientException(
+                        "A confirmed rent payment must carry a tenancy id.");
+                }
+
+                await commandSender.SendAsync(
+                    new RecordRentPaymentCommand(
+                        message.PaymentTransactionId,
+                        message.MerchantReference,
+                        tenancyId,
+                        message.Amount,
+                        message.CurrencyId)
+                    {
+                        StakeholderId = message.StakeholderId,
+                        ClientId = message.ClientId,
+                        FlowId = message.FlowId
+                    },
+                    cancellationToken);
+                CustomTelemetryContext.AddCustomEvent(
+                    Observability.EventNames.Payments.RecordRentPayment,
+                    ObservabilityEventProperties.Create(
+                        CurrentActorAccessor,
+                        message.StakeholderId,
+                        additionalProperties: new Dictionary<string, string>
+                        {
+                            [Observability.PropertyNames.Payments.PaymentReference] = message.MerchantReference,
+                            [Observability.PropertyNames.Payments.CurrencyId] = message.CurrencyId.ToString()
+                        }));
+                break;
+
             default:
                 throw new CannotProcessMessageNonTransientException(
                     $"Unsupported payment intent '{message.PaymentIntent}'.");

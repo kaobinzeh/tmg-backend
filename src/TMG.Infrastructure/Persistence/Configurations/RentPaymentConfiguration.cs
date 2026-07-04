@@ -23,6 +23,11 @@ public sealed class RentPaymentConfiguration : IEntityTypeConfiguration<RentPaym
         builder.HasIndex(payment => payment.TenancyId);
         builder.HasIndex(payment => payment.ClientId);
 
+        // One rent payment per gateway transaction — keeps in-app settlement idempotent. Offline payments leave it null.
+        builder.HasIndex(payment => payment.PaymentTransactionId)
+            .IsUnique()
+            .HasFilter("\"PaymentTransactionId\" IS NOT NULL");
+
         builder.HasOne<Tenancy>()
             .WithMany()
             .HasForeignKey(payment => payment.TenancyId)

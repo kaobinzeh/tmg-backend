@@ -20,7 +20,8 @@ public sealed class PaymentTransaction : Entity, IAggregateRoot
         Guid countryId,
         Guid initiatedByUserId,
         Guid stakeholderId,
-        Guid clientId)
+        Guid clientId,
+        Guid? tenancyId)
     {
         MerchantReference = merchantReference;
         PaymentIntent = paymentIntent;
@@ -32,6 +33,7 @@ public sealed class PaymentTransaction : Entity, IAggregateRoot
         InitiatedByUserId = initiatedByUserId;
         StakeholderId = stakeholderId;
         ClientId = clientId;
+        TenancyId = tenancyId;
     }
 
     public string MerchantReference { get; private set; } = string.Empty;
@@ -45,6 +47,10 @@ public sealed class PaymentTransaction : Entity, IAggregateRoot
     public Guid InitiatedByUserId { get; private set; }
     public Guid StakeholderId { get; private set; }
     public Guid ClientId { get; private set; }
+
+    /// <summary>The tenancy this payment is for, when the intent is <see cref="PaymentIntent.RentPayment"/>; otherwise null.</summary>
+    public Guid? TenancyId { get; private set; }
+
     public string? FailureReason { get; private set; }
     public string? StatusChangeReason { get; private set; }
     public DateTimeOffset? ExpiresAtUtc { get; private set; }
@@ -64,7 +70,8 @@ public sealed class PaymentTransaction : Entity, IAggregateRoot
         Guid countryId,
         Guid initiatedByUserId,
         Guid stakeholderId,
-        Guid clientId) =>
+        Guid clientId,
+        Guid? tenancyId = null) =>
         new(
             merchantReference.Trim(),
             paymentIntent,
@@ -75,7 +82,8 @@ public sealed class PaymentTransaction : Entity, IAggregateRoot
             countryId,
             initiatedByUserId,
             stakeholderId,
-            clientId);
+            clientId,
+            tenancyId);
 
     public bool HasReachedTerminalState() =>
         PaymentStatus is PaymentStatus.Succeeded or PaymentStatus.Failed or PaymentStatus.Cancelled or PaymentStatus.Expired;

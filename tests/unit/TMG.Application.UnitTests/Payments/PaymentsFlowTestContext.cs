@@ -10,7 +10,9 @@ using TMG.Domain.Common.Observability;
 using TMG.Domain.Payments.Entities;
 using TMG.Domain.Payments.ReadModels;
 using TMG.Domain.Payments.Services;
+using TMG.Domain.Properties.Entities;
 using TMG.Domain.Stakeholders.Entities;
+using TMG.Domain.Tenancies.Entities;
 
 namespace TMG.Application.UnitTests.Payments;
 
@@ -22,6 +24,8 @@ internal sealed class PaymentsFlowTestContext
     public IRepository<PaymentProvider> PaymentProviderRepository { get; } = Substitute.For<IRepository<PaymentProvider>>();
     public IRepository<PaymentProviderConfiguration> PaymentProviderConfigurationRepository { get; } = Substitute.For<IRepository<PaymentProviderConfiguration>>();
     public IRepository<PaymentTransaction> PaymentTransactionRepository { get; } = Substitute.For<IRepository<PaymentTransaction>>();
+    public IRepository<Tenancy> TenancyRepository { get; } = Substitute.For<IRepository<Tenancy>>();
+    public IRepository<Unit> UnitRepository { get; } = Substitute.For<IRepository<Unit>>();
     public IRepository<PaymentWebhookInbox> PaymentWebhookInboxRepository { get; } = Substitute.For<IRepository<PaymentWebhookInbox>>();
     public IWalletTransactionReadModelRepository WalletTransactionReadModelRepository { get; } = Substitute.For<IWalletTransactionReadModelRepository>();
     public ICustomTelemetryContext CustomTelemetryContext { get; } = Substitute.For<ICustomTelemetryContext>();
@@ -42,6 +46,8 @@ internal sealed class PaymentsFlowTestContext
             PaymentProviderRepository,
             PaymentProviderConfigurationRepository,
             PaymentTransactionRepository,
+            TenancyRepository,
+            UnitRepository,
             PaymentProviderServices,
             CustomTelemetryContext,
             UnitOfWork);

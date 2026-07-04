@@ -10,4 +10,7 @@ public sealed record SuccessfulPaymentConfirmed : BaseEvent
     public Guid PaymentProviderId { get; init; }
     public decimal Amount { get; init; }
     public Guid CurrencyId { get; init; }
+
+    /// <summary>Set when <see cref="PaymentIntent"/> is <see cref="PaymentIntent.RentPayment"/>; identifies the tenancy to settle.</summary>
+    public Guid? TenancyId { get; init; }
 }

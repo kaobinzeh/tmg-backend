@@ -1,3 +1,4 @@
+using TMG.Contracts.Payments;
 using TMG.Domain.Common.Exceptions;
 using TMG.Domain.Common.Observability;
 using TMG.Domain.Common.Persistence;
@@ -5,7 +6,10 @@ using TMG.Domain.Payments;
 using TMG.Domain.Payments.Entities;
 using TMG.Domain.Payments.Services;
 using TMG.Domain.Payments.Specifications;
+using TMG.Domain.Properties.Entities;
 using TMG.Domain.Stakeholders.Entities;
+using TMG.Domain.Tenancies.Entities;
+using TMG.Domain.Tenancies.Specifications;
 
 namespace TMG.Application.Payments.Features.InitiatePayment;
 
@@ -16,6 +20,8 @@ public sealed class InitiatePaymentHandler(
     IRepository<PaymentProvider> paymentProviderRepository,
     IRepository<PaymentProviderConfiguration> paymentProviderConfigurationRepository,
     IRepository<PaymentTransaction> paymentTransactionRepository,
+    IRepository<Tenancy> tenancyRepository,
+    IRepository<Unit> unitRepository,
     IEnumerable<IPaymentProviderService> paymentProviderServices,
     ICustomTelemetryContext customTelemetryContext,
     IUnitOfWork unitOfWork)
@@ -28,13 +34,47 @@ public sealed class InitiatePaymentHandler(
         var stakeholder = await stakeholderRepository.GetByIdAsync(stakeholderId, cancellationToken)
             ?? throw new InvalidOperationException($"Unable to resolve stakeholder '{stakeholderId}' for payment initiation.");
 
+        // Rent payments are server-authoritative: the amount and currency come from the unit, and the tenancy
+        // must be active and belong to the authenticated tenant. Any client-sent amount/currency is ignored.
+        var amount = command.Amount;
+        var currencyId = command.CurrencyId;
+        Guid? tenancyId = null;
+
+        if (command.PaymentIntent == PaymentIntent.RentPayment)
+        {
+            var requestedTenancyId = command.TenancyId
+                ?? throw new InvalidOperationException("A tenancy id is required to pay rent in-app.");
+
+            var tenancy = await tenancyRepository.FirstOrDefaultAsync(
+                new TenancyByIdForClientSpecification(requestedTenancyId, stakeholder.ClientId),
+                cancellationToken)
+                ?? throw new InvalidOperationException($"Tenancy '{requestedTenancyId}' was not found.");
+
+            if (tenancy.TenantStakeholderId != stakeholder.Id)
+            {
+                throw new InvalidOperationException("The tenancy does not belong to the authenticated tenant.");
+            }
+
+            if (tenancy.Status != TenancyStatus.Active)
+            {
+                throw new InvalidOperationException("Rent can only be paid for a tenancy with an active rent cycle.");
+            }
+
+            var unit = await unitRepository.GetByIdAsync(tenancy.UnitId, cancellationToken)
+                ?? throw new InvalidOperationException($"Unit '{tenancy.UnitId}' was not found for tenancy '{tenancy.Id}'.");
+
+            amount = unit.RentAmount;
+            currencyId = unit.CurrencyId;
+            tenancyId = tenancy.Id;
+        }
+
         var currency = await currencyRepository.FirstOrDefaultAsync(
-            new ActiveCurrencyByIdSpecification(command.CurrencyId),
+            new ActiveCurrencyByIdSpecification(currencyId),
             cancellationToken)
-            ?? throw new InvalidOperationException($"Currency '{command.CurrencyId}' is not active.");
+            ?? throw new InvalidOperationException($"Currency '{currencyId}' is not active.");
 
         var supportedCountryCurrency = await countryCurrencyRepository.FirstOrDefaultAsync(
-            new CountryCurrencyByCountryAndCurrencySpecification(stakeholder.CountryId, command.CurrencyId),
+            new CountryCurrencyByCountryAndCurrencySpecification(stakeholder.CountryId, currencyId),
             cancellationToken);
 
         if (supportedCountryCurrency is null)
@@ -49,7 +89,7 @@ public sealed class InitiatePaymentHandler(
             ?? throw new InvalidOperationException($"Payment provider '{command.PaymentProviderId}' is not active.");
 
         _ = await paymentProviderConfigurationRepository.FirstOrDefaultAsync(
-                new EnabledPaymentProviderConfigurationSpecification(command.PaymentProviderId, command.CurrencyId, command.PaymentIntent),
+                new EnabledPaymentProviderConfigurationSpecification(command.PaymentProviderId, currencyId, command.PaymentIntent),
                 cancellationToken)
             ?? throw new InvalidOperationException(
                 $"Payment provider '{paymentProvider.ProviderName}' does not support '{currency.CurrencyCode}' for '{command.PaymentIntent}'.");
@@ -61,14 +101,14 @@ public sealed class InitiatePaymentHandler(
 
         var merchantReference = $"pay_{Guid.CreateVersion7():N}";
 
-        var paymentTransaction = PaymentTransaction.Create(merchantReference, command.PaymentIntent, paymentProvider.Id, command.Amount, command.CurrencyId, stakeholder.CountryId, stakeholder.AppUserId, stakeholder.Id, stakeholder.ClientId);
+        var paymentTransaction = PaymentTransaction.Create(merchantReference, command.PaymentIntent, paymentProvider.Id, amount, currencyId, stakeholder.CountryId, stakeholder.AppUserId, stakeholder.Id, stakeholder.ClientId, tenancyId);
 
         await paymentTransactionRepository.AddAsync(paymentTransaction);
 
         var initiationResult = await paymentProviderService.InitiatePaymentAsync(
             new PaymentProviderInitiationRequest(
                 merchantReference,
-                command.Amount,
+                amount,
                 currency.CurrencyCode,
                 command.PaymentIntent,
                 stakeholder.Id,
