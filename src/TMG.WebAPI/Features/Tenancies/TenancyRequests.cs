@@ -40,3 +40,5 @@ public sealed record AllocateUnitResponse(Guid TenancyId);
 public sealed record UploadTenancyDocumentResponse(Guid DocumentId);
 
 public sealed record RecordRentPaymentResponse(Guid RentPaymentId, Guid? ReceiptDocumentId);
+
+public sealed record DocumentDownloadUrlResponse(string Url, DateTimeOffset ExpiresAtUtc);

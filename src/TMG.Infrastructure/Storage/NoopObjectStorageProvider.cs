@@ -18,6 +18,9 @@ internal sealed class NoopObjectStorageProvider : IObjectStorageProvider
         return Task.FromResult($"https://example.invalid/private/{escapedKey}");
     }
 
+    public Task<string> GetSignedDownloadUrlAsync(string storageKey, DateTimeOffset expiresAtUtc, CancellationToken cancellationToken)
+        => Task.FromResult($"{storageKey}?signed=noop&expires={expiresAtUtc.ToUnixTimeSeconds()}");
+
     private static string NormalizeObjectKey(string objectKey)
         => objectKey.TrimStart('/').Replace("\\", "/", StringComparison.Ordinal);
 }

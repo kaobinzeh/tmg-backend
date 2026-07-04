@@ -113,13 +113,14 @@ WebAPI feature folder, routes in `EndpointUrl.cs`, handlers registered in `Appli
 
 ---
 
-## Phase 5 — Feature 5: Per-Unit Document Vault (the lock-in)
+## Phase 5 — Feature 5: Per-Unit Document Vault (the lock-in) ✅
 
-- **Domain:** `TenancyDocument` — `DocumentType` enum (`Agreement`, `NationalId`, `PassportPhoto`, `Receipt`, `Notice`), `StorageKey`, `UploadedByStakeholderId`.
-- **Storage:** wrap existing object storage for upload + time-limited signed download URLs.
-- **Agreement:** on accept, generate the tenancy agreement, store it, email a signed copy (`TenancyAgreementReady`).
-- **Application:** `UploadDocument`, `ListUnitDocuments`, `GetDocumentDownloadUrl`.
-- **WebAPI:** `DocumentsController` scoped per unit/tenancy.
+- **Domain:** ✅ `TenancyDocument` (`Agreement`, `NationalId`, `PassportPhoto`, `Receipt`, `Notice`) already existed; added `TenancyDocumentsByTenancySpecification` + `TenancyDocumentByIdForClientSpecification`.
+- **Storage:** ✅ added `IObjectStorageService.GetSignedDownloadUrlAsync(storageKey, expiresAtUtc)` — R2 recovers the object key from the stored private URL and returns an S3 presigned GET URL (~15-min validity); Noop returns a stub URL.
+- **Agreement:** ✅ on accept, `AcceptTenancyInvitationHandler` archives the agreement via `ITenancyAgreementArchiver` (renderer + `TenancyDocumentType.Agreement`) and publishes `TenancyAgreementReady` → consumer emails the tenant. New `NotificationType.TenancyAgreementReady = 15` + template + seeder row.
+- **Application:** ✅ `ListTenancyDocuments` + `GetTenancyDocumentDownloadUrl` slices, gated by `TenancyDocumentAccessGuard` (manager of the client sees all its tenancies' documents; a tenant sees only their own — closes the cross-tenant privacy gap). `UploadDocument` shipped in Phase 2.
+- **WebAPI:** ✅ `DocumentsController` — `GET …/allocations/{tenancyId}/documents` (list) and `GET …/documents/{documentId}/download-url` (signed URL).
+- **Receipt/agreement archival** share the same object-storage + `TenancyDocument` write path (`IRentReceiptArchiver` / `ITenancyAgreementArchiver`). No EF migration needed (no new columns).
 
 ---
 

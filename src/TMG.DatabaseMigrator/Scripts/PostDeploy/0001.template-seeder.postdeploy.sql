@@ -563,7 +563,8 @@ WITH template_values("NotificationType", "Description", "Subject", "TemplateFile
     (11, 'Unit allocation invitation notification', 'You have a new unit allocation', 'UnitAllocationInvitation.html'),
     (12, 'Rent due reminder (3 months) notification', 'Your rent at {{:PropertyName:}} is due in 3 months', 'RentDueReminder3Months.html'),
     (13, 'Rent due reminder (1 month) notification', 'Your rent at {{:PropertyName:}} is due in 1 month', 'RentDueReminder1Month.html'),
-    (14, 'Rent payment receipt notification', 'Your rent payment receipt for {{:PropertyName:}}', 'RentPaymentReceipt.html')
+    (14, 'Rent payment receipt notification', 'Your rent payment receipt for {{:PropertyName:}}', 'RentPaymentReceipt.html'),
+    (15, 'Tenancy agreement ready notification', 'Your tenancy agreement for {{:PropertyName:}} is ready', 'TenancyAgreementReady.html')
 ),
 templates_existing AS (
     SELECT t."NotificationType"

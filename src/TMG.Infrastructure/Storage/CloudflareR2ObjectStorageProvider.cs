@@ -41,6 +41,38 @@ internal sealed class CloudflareR2ObjectStorageProvider(IOptions<CloudflareR2Opt
         return $"{endpoint}/{bucketName}/{objectKey}";
     }
 
+    public async Task<string> GetSignedDownloadUrlAsync(string storageKey, DateTimeOffset expiresAtUtc, CancellationToken cancellationToken)
+    {
+        var configuredOptions = options.Value;
+        EnsureConfigured(configuredOptions);
+
+        var endpoint = configuredOptions.Endpoint.TrimEnd('/');
+        var bucketName = configuredOptions.PrivateBucketName.Trim();
+
+        // Private uploads store "{endpoint}/{bucket}/{objectKey}"; recover the object key to presign it.
+        var prefix = $"{endpoint}/{bucketName}/";
+        var objectKey = storageKey.StartsWith(prefix, StringComparison.Ordinal)
+            ? storageKey[prefix.Length..]
+            : NormalizeObjectKey(storageKey);
+
+        var credentials = new BasicAWSCredentials(configuredOptions.AccessKeyId, configuredOptions.SecretAccessKey);
+        var config = new AmazonS3Config
+        {
+            ServiceURL = endpoint,
+            ForcePathStyle = true,
+            AuthenticationRegion = "auto"
+        };
+
+        using var client = new AmazonS3Client(credentials, config);
+        return await client.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+        {
+            BucketName = bucketName,
+            Key = objectKey,
+            Verb = HttpVerb.GET,
+            Expires = expiresAtUtc.UtcDateTime
+        });
+    }
+
     private static async Task UploadToBucketAsync(
         ObjectStorageUploadRequest request,
         CloudflareR2Options options,
