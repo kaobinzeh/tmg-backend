@@ -17,6 +17,7 @@ using UserSignInFailedEvent = TMG.Contracts.Events.UserSignInFailed;
 using UserSignInSuccessfulEvent = TMG.Contracts.Events.UserSignInSuccessful;
 using TenantInvitedEvent = TMG.Contracts.Events.TenantInvited;
 using RentDueReminderTriggeredEvent = TMG.Contracts.Events.RentDueReminderTriggered;
+using RentPaymentReceivedEvent = TMG.Contracts.Events.RentPaymentReceived;
 
 namespace TMG.Consumer;
 
@@ -73,7 +74,8 @@ public static class ServiceCollectionExtensions
                 .AddHandler<EmailDeliveryWebhookReceivedEvent, EmailDeliveryWebhookReceivedHandler>()
                 .AddHandler<SuccessfulPaymentConfirmedEvent, SuccessfulPaymentConfirmedHandler>()
                 .AddHandler<TenantInvitedEvent, TenantInvitedHandler>()
-                .AddHandler<RentDueReminderTriggeredEvent, RentDueReminderTriggeredHandler>())
+                .AddHandler<RentDueReminderTriggeredEvent, RentDueReminderTriggeredHandler>()
+                .AddHandler<RentPaymentReceivedEvent, RentPaymentReceivedHandler>())
             .AddConsumer(consumerConfig, builder => builder
                 .AddHandler<ResetPassword, ResetPasswordHandler>()
                 .AddHandler<SendNotification, SendNotificationHandler>()

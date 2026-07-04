@@ -101,11 +101,14 @@ WebAPI feature folder, routes in `EndpointUrl.cs`, handlers registered in `Appli
 
 ---
 
-## Phase 4 — Feature 4: Payment Recording + Auto-Receipt
+## Phase 4 — Feature 4: Payment Recording + Auto-Receipt ✅ (offline path shipped)
 
-- **Primary (offline):** `RecordRentPayment` slice — manager records a bank-transfer payment against a tenancy cycle → marks cycle paid, advances/renews → generates receipt → stores in vault → publishes `RentPaymentReceived` → Consumer sends `RentPaymentReceipt` email.
-- **Optional (in-app):** reuse `InitiatePaymentHandler` with `PaymentIntent.RentPayment` (TenancyId in metadata); extend `SuccessfulPaymentConfirmedHandler` to route `RentPayment` → same `RecordRentPayment` logic. Seed a `PaymentProviderConfiguration` for the rent intent.
-- **New:** receipt generation + `RentPaymentReceipt` template.
+- **Primary (offline):** ✅ `RecordRentPayment` slice — manager records a payment against a tenancy cycle → `Tenancy.RecordRentPayment` settles the term (see below) → a `RentPayment` ledger entry is created → an HTML receipt is rendered (`IRentReceiptRenderer`) and archived in the vault as a `TenancyDocument{Receipt}` (linked back via `RentPayment.ReceiptDocumentId`) → publishes `RentPaymentReceived` → Consumer (`RentPaymentReceivedHandler`) sends the `RentPaymentReceipt` email.
+  - **Initial vs renewal:** the **first** recorded payment settles the current (initial) term the active cycle frames — the renewal date and armed reminders are unchanged. Every **subsequent** payment is a renewal that rolls the cycle forward one term and re-arms reminders. (`LastRentPaidAtUtc == null` distinguishes the first payment; no extra column.) `Activate` is unchanged.
+  - Endpoint: `POST api/v1/tenancies/allocations/{tenancyId}/payments`.
+  - Migration `AddRentPayments` (new `tenancies.RentPayments` table + `Tenancy.TermMonths`/`LastRentPaidAtUtc`).
+- **Optional (in-app):** ⏳ deferred — reuse `InitiatePaymentHandler` with `PaymentIntent.RentPayment`; extend `SuccessfulPaymentConfirmedHandler` to route to the same ledger + receipt logic; seed a `PaymentProviderConfiguration` for the rent intent. The `RentPayment` aggregate is the anchor for this path (`RecordedByStakeholderId` is nullable for system-recorded payments).
+- **New:** ✅ receipt generation + `RentPaymentReceipt` template (NotificationType 14, seeder row added).
 
 ---
 

@@ -47,6 +47,8 @@ public sealed class Tenancy : Entity, IAggregateRoot
     public DateTimeOffset? CycleStartUtc { get; private set; }
     public DateTimeOffset? CycleEndUtc { get; private set; }
     public DateTimeOffset? NextRentDueUtc { get; private set; }
+    public int? TermMonths { get; private set; }
+    public DateTimeOffset? LastRentPaidAtUtc { get; private set; }
     public DateTimeOffset? Reminder3MonthsSentAtUtc { get; private set; }
     public DateTimeOffset? Reminder1MonthSentAtUtc { get; private set; }
 
@@ -96,8 +98,51 @@ public sealed class Tenancy : Entity, IAggregateRoot
         CycleStartUtc = startUtc;
         CycleEndUtc = startUtc.AddMonths(termMonths);
         NextRentDueUtc = CycleEndUtc;
+        TermMonths = termMonths;
         Reminder3MonthsSentAtUtc = null;
         Reminder1MonthSentAtUtc = null;
+    }
+
+    /// <summary>
+    /// Records a rent payment against the active cycle and returns the lease period it covers.
+    /// The first payment settles the current (initial) term the cycle already frames — the upcoming renewal
+    /// date is unchanged. Every subsequent payment is a renewal that rolls the cycle forward by one term and
+    /// re-arms the renewal reminders.
+    /// </summary>
+    public RentPeriod RecordRentPayment(DateTimeOffset paidAtUtc)
+    {
+        if (Status != TenancyStatus.Active)
+        {
+            throw new InvalidOperationException(
+                $"Tenancy '{Id}' must have an active rent cycle before a payment can be recorded (current status: {Status}).");
+        }
+
+        if (TermMonths is not { } term || CycleStartUtc is not { } currentStart || CycleEndUtc is not { } currentEnd)
+        {
+            throw new InvalidOperationException($"Tenancy '{Id}' does not have an initialized rent cycle.");
+        }
+
+        RentPeriod period;
+        if (LastRentPaidAtUtc is null)
+        {
+            // First payment settles the current term the cycle already frames; NextRentDueUtc (the upcoming
+            // renewal, == CycleEndUtc) and the armed reminders stay as they are.
+            period = new RentPeriod(currentStart, currentEnd);
+        }
+        else
+        {
+            // Renewal: roll the cycle forward by one term and re-arm the renewal reminders.
+            var nextEnd = currentEnd.AddMonths(term);
+            period = new RentPeriod(currentEnd, nextEnd);
+            CycleStartUtc = currentEnd;
+            CycleEndUtc = nextEnd;
+            NextRentDueUtc = nextEnd;
+            Reminder3MonthsSentAtUtc = null;
+            Reminder1MonthSentAtUtc = null;
+        }
+
+        LastRentPaidAtUtc = paidAtUtc;
+        return period;
     }
 
     public void RecordReminderSent(RentReminderKind kind, DateTimeOffset sentAtUtc)

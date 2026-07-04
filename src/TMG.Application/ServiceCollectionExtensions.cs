@@ -30,6 +30,7 @@ using TMG.Application.Tenancies.Features.AllocateUnit;
 using TMG.Application.Tenancies.Features.GetTenancyCycle;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Application.Tenancies.Features.ProcessRentReminders;
+using TMG.Application.Tenancies.Features.RecordRentPayment;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
 using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Application.Stakeholders.Features.UpdateProfile;
@@ -80,6 +81,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RentReminderService>();
         services.AddScoped<RejectTenancyInvitationHandler>();
         services.AddScoped<UploadTenancyDocumentHandler>();
+        services.AddScoped<RecordRentPaymentHandler>();
 
         return services;
     }
