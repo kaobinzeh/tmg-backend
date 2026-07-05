@@ -7,6 +7,7 @@ public sealed record StakeholderReadModel(
     Guid ClientId,
     Guid CountryId,
     Guid StakeholderTypeId,
+    string StakeholderTypeKey,
     string FirstName,
     string LastName,
     string? AvatarUrl,

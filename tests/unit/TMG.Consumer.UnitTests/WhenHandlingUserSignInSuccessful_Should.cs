@@ -45,7 +45,7 @@ public sealed class WhenHandlingUserSignInSuccessful_Should
         identityService.FindByIdAsync(appUserId).Returns(user);
         identityService.ResetAccessFailedCountAsync(user).Returns(IdentityResult.Success);
         stakeholderReadModelRepository.GetByStakeholderIdAsync(stakeholderId, Arg.Any<CancellationToken>())
-            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), "Ada", "Lovelace", null, false));
+            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), "manager", "Ada", "Lovelace", null, false));
         userAgentParserService.Parse(userAgent).Returns(new UserAgentInfo("Desktop", "Windows", "Chrome"));
         loginActivityIpAddressResolver.ResolveAsync(ipAddress, Arg.Any<CancellationToken>())
             .Returns(new LoginActivityIpAddressResolution(Guid.CreateVersion7(), null));

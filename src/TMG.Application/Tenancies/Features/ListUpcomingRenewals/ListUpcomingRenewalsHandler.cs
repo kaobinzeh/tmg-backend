@@ -1,11 +1,9 @@
-using TMG.Domain.Common.Persistence;
-using TMG.Domain.Tenancies.Entities;
-using TMG.Domain.Tenancies.Specifications;
+using TMG.Domain.Tenancies.ReadModels;
 
 namespace TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 
 public sealed class ListUpcomingRenewalsHandler(
-    IRepository<Tenancy> tenancyRepository,
+    ITenancyReadModelRepository tenancyReadModelRepository,
     TimeProvider timeProvider)
 {
     public async Task<ListUpcomingRenewalsResult> HandleAsync(ListUpcomingRenewalsCommand command, CancellationToken cancellationToken)
@@ -18,19 +16,22 @@ public sealed class ListUpcomingRenewalsHandler(
         var withinMonths = command.WithinMonths <= 0 ? 6 : command.WithinMonths;
         var horizon = timeProvider.GetUtcNow().AddMonths(withinMonths);
 
-        var tenancies = await tenancyRepository.ListAsync(
-            new UpcomingRenewalsByClientSpecification(clientId, horizon),
-            cancellationToken);
+        var renewals = await tenancyReadModelRepository.ListUpcomingRenewalsAsync(clientId, horizon, cancellationToken);
 
-        var items = tenancies
-            .Select(tenancy => new UpcomingRenewalListItem(
-                tenancy.Id,
-                tenancy.UnitId,
-                tenancy.PropertyId,
-                tenancy.TenantStakeholderId,
-                tenancy.CycleStartUtc,
-                tenancy.CycleEndUtc,
-                tenancy.NextRentDueUtc))
+        var items = renewals
+            .Select(renewal => new UpcomingRenewalListItem(
+                renewal.TenancyId,
+                renewal.UnitId,
+                renewal.PropertyId,
+                renewal.TenantStakeholderId,
+                renewal.TenantName,
+                renewal.TenantEmail,
+                renewal.UnitLabel,
+                renewal.PropertyName,
+                renewal.RentAmount,
+                renewal.CycleStartUtc,
+                renewal.CycleEndUtc,
+                renewal.NextRentDueUtc))
             .ToList();
 
         return new ListUpcomingRenewalsResult(ListUpcomingRenewalsStatus.Success, items);

@@ -37,7 +37,7 @@ public sealed class When_HandlingTenantInvited_WithPendingTenant_Should
 
         messageContext.CorrelationId.Returns(Guid.CreateVersion7().ToString("N"));
         stakeholderReadModelRepository.GetByStakeholderIdAsync(stakeholderId, Arg.Any<CancellationToken>())
-            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), firstName, lastName, null, false));
+            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), "tenant", firstName, lastName, null, false));
         twoFactorOtpService.OtpExistsAsync(appUserId, OtpIntent.TenancyInvitation, Arg.Any<CancellationToken>()).Returns(false);
         twoFactorOtpService.GenerateOtpAsync(appUserId, OtpIntent.TenancyInvitation, Arg.Any<CancellationToken>(), Arg.Any<int>(), Arg.Any<bool>())
             .Returns(invitation);

@@ -9,6 +9,11 @@ public sealed record UpcomingRenewalListItem(
     Guid UnitId,
     Guid PropertyId,
     Guid TenantStakeholderId,
+    string? TenantName,
+    string TenantEmail,
+    string UnitLabel,
+    string PropertyName,
+    decimal RentAmount,
     DateTimeOffset? CycleStartUtc,
     DateTimeOffset? CycleEndUtc,
     DateTimeOffset? NextRentDueUtc);

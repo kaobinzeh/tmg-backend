@@ -43,7 +43,7 @@ public sealed class WhenHandlingUserCreated_Should
 
         messageContext.CorrelationId.Returns(Guid.CreateVersion7().ToString("N"));
         stakeholderReadModelRepository.GetByStakeholderIdAsync(stakeholderId, Arg.Any<CancellationToken>())
-            .Returns(new StakeholderReadModel(stakeholderId, user.Id, email, clientId, countryId, Guid.CreateVersion7(), firstName, lastName, null, false));
+            .Returns(new StakeholderReadModel(stakeholderId, user.Id, email, clientId, countryId, Guid.CreateVersion7(), "manager", firstName, lastName, null, false));
         identityService.FindByIdAsync(user.Id).Returns(user);
         identityService.GenerateSignUpOtpAsync(user).Returns(otpCode);
 

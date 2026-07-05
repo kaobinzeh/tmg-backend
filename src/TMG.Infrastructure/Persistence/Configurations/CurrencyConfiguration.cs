@@ -20,6 +20,9 @@ public sealed class CurrencyConfiguration : IEntityTypeConfiguration<Currency>
             .HasMaxLength(100)
             .IsRequired();
 
+        builder.Property(currency => currency.CurrencySymbol)
+            .HasMaxLength(10);
+
         builder.Property(currency => currency.IsActive)
             .IsRequired();
 

@@ -43,6 +43,7 @@ public sealed class When_HandlingUserAccessTokenRefresh_WithValidStakeholder_Sho
                 clientId,
                 Guid.CreateVersion7(),
                 Guid.CreateVersion7(),
+                "manager",
                 ConsumerTestData.FirstName(),
                 ConsumerTestData.LastName(),
                 null,

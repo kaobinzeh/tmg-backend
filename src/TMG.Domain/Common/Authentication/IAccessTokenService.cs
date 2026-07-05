@@ -4,5 +4,5 @@ namespace TMG.Domain.Common.Authentication;
 
 public interface IAccessTokenService
 {
-    AccessToken Generate(AppUser user, Guid stakeholderId);
+    AccessToken Generate(AppUser user, Guid stakeholderId, string stakeholderTypeKey);
 }

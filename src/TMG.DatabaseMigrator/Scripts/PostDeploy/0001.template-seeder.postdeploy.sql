@@ -359,9 +359,9 @@ SELECT gen_random_uuid(), v."ProviderName", v."ProviderKey", v."IsActive", NOW()
 FROM payment_provider_values v
 WHERE NOT EXISTS (SELECT 1 FROM payment_providers_existing e WHERE e."ProviderKey" = v."ProviderKey");
 
-WITH currency_values("CurrencyCode", "CurrencyName", "IsActive") AS (VALUES
-    ('NGN', 'Naira', TRUE),
-    ('USD', 'US Dollar', TRUE)
+WITH currency_values("CurrencyCode", "CurrencyName", "CurrencySymbol", "IsActive") AS (VALUES
+    ('NGN', 'Naira', '₦', TRUE),
+    ('USD', 'US Dollar', '$', TRUE)
 ),
 currencies_existing AS (
     SELECT t."CurrencyCode"
@@ -372,15 +372,17 @@ currencies_updated AS (
     UPDATE payments."Currencies" t
     SET
         "CurrencyName" = v."CurrencyName",
+        "CurrencySymbol" = v."CurrencySymbol",
         "IsActive" = v."IsActive",
         "UpdatedAtUtc" = NOW()
     FROM currency_values v
     WHERE t."CurrencyCode" = v."CurrencyCode"
       AND (t."CurrencyName" IS DISTINCT FROM v."CurrencyName"
+           OR t."CurrencySymbol" IS DISTINCT FROM v."CurrencySymbol"
            OR t."IsActive" IS DISTINCT FROM v."IsActive")
 )
-INSERT INTO payments."Currencies" ("Id", "CurrencyCode", "CurrencyName", "IsActive", "CreatedAtUtc", "UpdatedAtUtc", "IsDeleted")
-SELECT gen_random_uuid(), v."CurrencyCode", v."CurrencyName", v."IsActive", NOW(), NOW(), FALSE
+INSERT INTO payments."Currencies" ("Id", "CurrencyCode", "CurrencyName", "CurrencySymbol", "IsActive", "CreatedAtUtc", "UpdatedAtUtc", "IsDeleted")
+SELECT gen_random_uuid(), v."CurrencyCode", v."CurrencyName", v."CurrencySymbol", v."IsActive", NOW(), NOW(), FALSE
 FROM currency_values v
 WHERE NOT EXISTS (SELECT 1 FROM currencies_existing e WHERE e."CurrencyCode" = v."CurrencyCode");
 
