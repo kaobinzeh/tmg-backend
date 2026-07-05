@@ -57,7 +57,10 @@ public sealed class RefreshSessionHandler(
         }
 
         var currentStakeholder = await stakeholderResolver.GetRequiredAsync(user.Id, cancellationToken);
-        var accessToken = accessTokenService.Generate(user, currentStakeholder.Id);
+        var accessToken = accessTokenService.Generate(
+            user,
+            currentStakeholder.Id,
+            currentStakeholder.StakeholderType?.Key ?? string.Empty);
         var refreshToken = await refreshTokenService.RotateAsync(currentRefreshToken, user, cancellationToken);
 
         await PublishTokenRefreshedAsync(

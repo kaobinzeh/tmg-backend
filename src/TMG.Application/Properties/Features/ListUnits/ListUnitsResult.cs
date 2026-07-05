@@ -13,7 +13,11 @@ public sealed record UnitListItem(
     int NumberOfRooms,
     decimal RentAmount,
     Guid CurrencyId,
-    UnitStatus Status);
+    UnitStatus Status,
+    Guid? CurrentTenancyId,
+    string? CurrentTenancyStatus,
+    string? TenantName,
+    string? TenantEmail);
 
 public enum ListUnitsStatus
 {

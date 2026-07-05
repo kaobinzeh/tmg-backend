@@ -33,7 +33,7 @@ public sealed class WhenHandlingResetPasswordWithActiveOtp_Should
         twoFactorOtpService.OtpExistsAsync(appUserId, OtpIntent.PasswordReset, Arg.Any<CancellationToken>())
             .Returns(true);
         stakeholderReadModelRepository.GetByStakeholderIdAsync(stakeholderId, Arg.Any<CancellationToken>())
-            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), ConsumerTestData.FirstName(), ConsumerTestData.LastName(), null, false));
+            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), "manager", ConsumerTestData.FirstName(), ConsumerTestData.LastName(), null, false));
 
         await new ResetPasswordHandler(
             customTelemetryContext,

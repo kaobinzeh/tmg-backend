@@ -4,7 +4,11 @@ using TMG.Application.Tenancies.Features.AcceptTenancyInvitation;
 using TMG.Application.Tenancies.Features.ActivateTenancy;
 using TMG.Application.Tenancies.Features.AllocateUnit;
 using TMG.Application.Tenancies.Features.GetTenancyCycle;
+using TMG.Application.Tenancies.Features.GetTenancySummary;
+using TMG.Application.Tenancies.Features.ListMyTenancies;
+using TMG.Application.Tenancies.Features.ListTenancyAllocations;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
+using TMG.Domain.Tenancies.Entities;
 using TMG.Application.Tenancies.Features.RecordRentPayment;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
 using TMG.Application.Tenancies.Features.UploadTenancyDocument;
@@ -27,6 +31,9 @@ public sealed class TenanciesController(
     ActivateTenancyHandler activateTenancyHandler,
     RecordRentPaymentHandler recordRentPaymentHandler,
     GetTenancyCycleHandler getTenancyCycleHandler,
+    GetTenancySummaryHandler getTenancySummaryHandler,
+    ListTenancyAllocationsHandler listTenancyAllocationsHandler,
+    ListMyTenanciesHandler listMyTenanciesHandler,
     ListUpcomingRenewalsHandler listUpcomingRenewalsHandler,
     IValidator<AllocateUnitRequest> allocateUnitValidator,
     IValidator<AcceptTenancyInvitationRequest> acceptValidator,
@@ -298,6 +305,76 @@ public sealed class TenanciesController(
         {
             ListUpcomingRenewalsStatus.NotAuthenticated => Unauthorized(),
             _ => Ok(result.Renewals)
+        };
+    }
+
+    [HttpGet("allocations")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<IReadOnlyList<TenancyAllocationListItem>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IReadOnlyList<TenancyAllocationListItem>>> ListAllocations(
+        [FromQuery] string? status,
+        CancellationToken cancellationToken)
+    {
+        TenancyStatus? statusFilter = null;
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (!Enum.TryParse<TenancyStatus>(status, true, out var parsedStatus))
+            {
+                return BadRequest("Status must be one of: Invited, Accepted, Rejected, Active.");
+            }
+
+            statusFilter = parsedStatus;
+        }
+
+        var result = await listTenancyAllocationsHandler.HandleAsync(
+            new ListTenancyAllocationsCommand(ActorContext.FromCurrentActor(currentActor), statusFilter),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ListTenancyAllocationsStatus.NotAuthenticated => Unauthorized(),
+            _ => Ok(result.Allocations)
+        };
+    }
+
+    [HttpGet("allocations/mine")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<IReadOnlyList<TenancyAllocationListItem>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IReadOnlyList<TenancyAllocationListItem>>> ListMyTenancies(
+        CancellationToken cancellationToken)
+    {
+        var result = await listMyTenanciesHandler.HandleAsync(
+            new ListMyTenanciesCommand(ActorContext.FromCurrentActor(currentActor)),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ListMyTenanciesStatus.NotAuthenticated => Unauthorized(),
+            _ => Ok(result.Tenancies)
+        };
+    }
+
+    [HttpGet("summary")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<TenancySummaryDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<TenancySummaryDto>> GetSummary(
+        [FromQuery] int withinMonths,
+        CancellationToken cancellationToken)
+    {
+        var result = await getTenancySummaryHandler.HandleAsync(
+            new GetTenancySummaryCommand(
+                ActorContext.FromCurrentActor(currentActor),
+                withinMonths <= 0 ? 6 : withinMonths),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            GetTenancySummaryStatus.NotAuthenticated => Unauthorized(),
+            _ => Ok(result.Summary)
         };
     }
 }

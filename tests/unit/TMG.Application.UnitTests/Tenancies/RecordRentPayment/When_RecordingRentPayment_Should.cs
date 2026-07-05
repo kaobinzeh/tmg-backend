@@ -63,7 +63,7 @@ public sealed class When_RecordingRentPayment_Should
             .GetByStakeholderIdAsync(tenancy.TenantStakeholderId, Arg.Any<CancellationToken>())
             .Returns(new StakeholderReadModel(
                 tenancy.TenantStakeholderId, Guid.CreateVersion7(), "tenant@example.com", clientId,
-                Guid.CreateVersion7(), Guid.CreateVersion7(), "Tobi", "Ade", null, true));
+                Guid.CreateVersion7(), Guid.CreateVersion7(), "tenant", "Tobi", "Ade", null, true));
 
         var receiptArchiver = Substitute.For<IRentReceiptArchiver>();
         receiptArchiver

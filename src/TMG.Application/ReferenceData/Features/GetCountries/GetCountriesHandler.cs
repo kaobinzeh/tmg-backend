@@ -7,7 +7,8 @@ namespace TMG.Application.ReferenceData.Features.GetCountries;
 
 public sealed class GetCountriesHandler(IRepository<Country> countries, IJsonCache cache)
 {
-    private const string CacheKey = "reference-data:countries";
+    // Versioned so cached payloads from the previous response shape are not deserialized.
+    private const string CacheKey = "reference-data:countries:v2";
 
     public async Task<IReadOnlyList<GetCountriesResponse>> HandleAsync(CancellationToken cancellationToken)
     {
@@ -19,6 +20,7 @@ public sealed class GetCountriesHandler(IRepository<Country> countries, IJsonCac
 
         var response = (await countries.ListAsync(new EnabledCountriesSpecification(), cancellationToken))
             .Select(country => new GetCountriesResponse(
+                country.Id,
                 country.Name,
                 country.ShortCode,
                 country.CallingCode,

@@ -22,10 +22,11 @@ public sealed class WhenGeneratingAccessToken_Should
             }),
             new FakeTimeProvider());
 
-        var token = sut.Generate(user, stakeholderId);
+        var token = sut.Generate(user, stakeholderId, "manager");
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token.Value);
 
         jwt.Claims.Single(claim => claim.Type == CustomClaimTypes.StakeholderId).Value.ShouldBe(stakeholderId.ToString());
+        jwt.Claims.Single(claim => claim.Type == CustomClaimTypes.StakeholderType).Value.ShouldBe("manager");
     }
 
     private sealed class FakeTimeProvider : TimeProvider

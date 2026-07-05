@@ -46,7 +46,7 @@ public sealed class WhenHandlingResetPassword_Should
                 false)
             .Returns(otp);
         stakeholderReadModelRepository.GetByStakeholderIdAsync(stakeholderId, Arg.Any<CancellationToken>())
-            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), firstName, lastName, null, false));
+            .Returns(new StakeholderReadModel(stakeholderId, appUserId, email, clientId, countryId, Guid.CreateVersion7(), "manager", firstName, lastName, null, false));
 
         await new ResetPasswordHandler(
             customTelemetryContext,

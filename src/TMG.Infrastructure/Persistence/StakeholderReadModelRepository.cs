@@ -27,6 +27,7 @@ public sealed class StakeholderReadModelRepository(AppReadDbContext dbContext) :
             stakeholder.ClientId,
             stakeholder.CountryId,
             stakeholder.StakeholderTypeId,
+            stakeholder.StakeholderType.Key,
             stakeholder.FirstName,
             stakeholder.LastName,
             stakeholder.AvatarUrl,

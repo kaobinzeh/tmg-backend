@@ -52,6 +52,13 @@ public static class EndpointUrl
     {
         public const string Route = $"api/{Versions.V1Route}/stakeholders";
         public static readonly string V1 = ToV1(Route);
+        public static readonly string MeV1 = $"{V1}/me";
+    }
+
+    public static class Currencies
+    {
+        public const string Route = $"api/{Versions.V1Route}/reference-data/currencies";
+        public static readonly string V1 = ToV1(Route);
     }
 
     public static class Providers
@@ -84,6 +91,8 @@ public static class EndpointUrl
         public static readonly string RejectInvitationV1 = $"{V1}/reject-invitation";
         public static readonly string DocumentsV1 = $"{V1}/documents";
         public static readonly string UpcomingRenewalsV1 = $"{V1}/allocations/upcoming-renewals";
+        public static readonly string AllocationsMineV1 = $"{V1}/allocations/mine";
+        public static readonly string SummaryV1 = $"{V1}/summary";
         public static string ActivateV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/activate";
         public static string CycleV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/cycle";
         public static string PaymentsV1(Guid tenancyId) => $"{V1}/allocations/{tenancyId}/payments";

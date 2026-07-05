@@ -3,6 +3,7 @@ using TMG.Domain.Common.Persistence;
 using TMG.Domain.Authentication.Persistence;
 using TMG.Domain.Payments.ReadModels;
 using TMG.Domain.Stakeholders.ReadModels;
+using TMG.Domain.Tenancies.ReadModels;
 using TMG.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>));
         services.AddScoped<IStakeholderReadModelRepository, StakeholderReadModelRepository>();
         services.AddScoped<IWalletTransactionReadModelRepository, WalletTransactionReadModelRepository>();
+        services.AddScoped<ITenancyReadModelRepository, TenancyReadModelRepository>();
 
         return services;
     }

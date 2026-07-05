@@ -31,7 +31,7 @@ public sealed class When_HandlingRecordRentPayment_WithNewPayment_Should
             .GetByStakeholderIdAsync(tenancy.TenantStakeholderId, Arg.Any<CancellationToken>())
             .Returns(new StakeholderReadModel(
                 tenancy.TenantStakeholderId, Guid.CreateVersion7(), "tenant@example.com", clientId,
-                Guid.CreateVersion7(), Guid.CreateVersion7(), "Tobi", "Ade", null, true));
+                Guid.CreateVersion7(), Guid.CreateVersion7(), "tenant", "Tobi", "Ade", null, true));
         context.ReceiptArchiver
             .ArchiveAsync(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<RentReceiptModel>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(receiptDocumentId);

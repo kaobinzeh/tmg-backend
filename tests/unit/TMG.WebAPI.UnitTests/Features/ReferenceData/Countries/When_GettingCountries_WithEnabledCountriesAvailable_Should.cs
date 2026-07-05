@@ -18,7 +18,7 @@ public sealed class When_GettingCountries_WithEnabledCountriesAvailable_Should
         var cache = Substitute.For<IJsonCache>();
         var response = new[]
         {
-            new GetCountriesResponse("Nigeria", "NG", "+234", "https://example.com/ng.svg")
+            new GetCountriesResponse(Guid.CreateVersion7(), "Nigeria", "NG", "+234", "https://example.com/ng.svg")
         };
 
         cache.GetAsync<GetCountriesResponse[]>(Arg.Any<string>(), Arg.Any<CancellationToken>())

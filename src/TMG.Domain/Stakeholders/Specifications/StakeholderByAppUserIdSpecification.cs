@@ -8,6 +8,7 @@ public sealed class StakeholderByAppUserIdSpecification : Specification<Stakehol
     public StakeholderByAppUserIdSpecification(Guid appUserId)
     {
         Where(stakeholder => stakeholder.AppUserId == appUserId);
+        AddInclude(stakeholder => stakeholder.StakeholderType);
         ApplyPaging(0, 1);
         EnableTracking();
     }

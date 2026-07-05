@@ -84,7 +84,10 @@ public sealed class GoogleSignInHandler(
         }
 
         var currentStakeholder = await stakeholderResolver.GetRequiredAsync(user.Id, cancellationToken);
-        var accessToken = accessTokenService.Generate(user, currentStakeholder.Id);
+        var accessToken = accessTokenService.Generate(
+            user,
+            currentStakeholder.Id,
+            currentStakeholder.StakeholderType?.Key ?? string.Empty);
         var refreshToken = await refreshTokenService.IssueAsync(user, cancellationToken);
 
         await PublishSuccessfulAsync(

@@ -35,7 +35,7 @@ public sealed class When_SigningIn_WithValidCredentials_Should
                 Arg.Any<ISpecification<Stakeholder>>(),
                 Arg.Any<CancellationToken>())
             .Returns(stakeholder);
-        context.AccessTokenService.Generate(user, stakeholder.Id)
+        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>())
             .Returns(new AccessToken("access-token", context.Clock.GetUtcNow().AddMinutes(15)));
         context.RefreshTokenService.IssueAsync(user, Arg.Any<CancellationToken>())
             .Returns(new RefreshToken("refresh-token", context.Clock.GetUtcNow().AddDays(7)));
