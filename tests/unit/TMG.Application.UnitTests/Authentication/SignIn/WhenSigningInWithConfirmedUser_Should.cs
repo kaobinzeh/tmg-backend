@@ -41,7 +41,7 @@ public sealed class WhenSigningInWithConfirmedUser_Should
         context.IdentityService.CheckPasswordAsync(user, password).Returns(true);
         context.StakeholderRepository.FirstOrDefaultAsync(Arg.Any<ISpecification<Stakeholder>>(), Arg.Any<CancellationToken>())
             .Returns(stakeholder);
-        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>()).Returns(expectedToken);
+        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>(), Arg.Any<Guid>()).Returns(expectedToken);
         context.RefreshTokenService.IssueAsync(user, Arg.Any<CancellationToken>()).Returns(expectedRefreshToken);
 
         var result = await context.CreateSignInHandler().HandleAsync(

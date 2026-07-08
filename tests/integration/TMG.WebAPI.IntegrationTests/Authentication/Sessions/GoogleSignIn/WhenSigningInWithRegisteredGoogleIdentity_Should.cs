@@ -35,7 +35,6 @@ public sealed class WhenSigningInWithRegisteredGoogleIdentity_Should(ContainersF
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateRegisteredGoogleUserAsync();
     }

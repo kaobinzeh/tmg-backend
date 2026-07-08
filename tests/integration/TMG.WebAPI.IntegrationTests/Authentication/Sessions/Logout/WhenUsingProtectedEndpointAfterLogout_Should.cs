@@ -40,7 +40,6 @@ public sealed class WhenUsingProtectedEndpointAfterLogout_Should(ContainersFixtu
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateVerifiedUserAsync();
     }

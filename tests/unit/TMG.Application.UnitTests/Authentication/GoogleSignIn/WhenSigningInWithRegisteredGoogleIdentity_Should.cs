@@ -45,7 +45,7 @@ public sealed class WhenSigningInWithRegisteredGoogleIdentity_Should
                 Arg.Any<ISpecification<Stakeholder>>(),
                 Arg.Any<CancellationToken>())
             .Returns(stakeholder);
-        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>()).Returns(expectedToken);
+        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>(), Arg.Any<Guid>()).Returns(expectedToken);
         context.RefreshTokenService.IssueAsync(user, Arg.Any<CancellationToken>()).Returns(expectedRefreshToken);
 
         var result = await context.CreateGoogleSignInHandler().HandleAsync(

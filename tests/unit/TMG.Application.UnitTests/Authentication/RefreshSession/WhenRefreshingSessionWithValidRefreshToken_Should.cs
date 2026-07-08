@@ -41,7 +41,7 @@ public sealed class WhenRefreshingSessionWithValidRefreshToken_Should
         context.IdentityService.GetSecurityStampAsync(user).Returns(securityStamp);
         context.StakeholderRepository.FirstOrDefaultAsync(Arg.Any<ISpecification<Stakeholder>>(), Arg.Any<CancellationToken>())
             .Returns(stakeholder);
-        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>()).Returns(expectedAccessToken);
+        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>(), Arg.Any<Guid>()).Returns(expectedAccessToken);
         context.RefreshTokenService.RotateAsync(storedRefreshToken, user, Arg.Any<CancellationToken>())
             .Returns(expectedRefreshToken);
 

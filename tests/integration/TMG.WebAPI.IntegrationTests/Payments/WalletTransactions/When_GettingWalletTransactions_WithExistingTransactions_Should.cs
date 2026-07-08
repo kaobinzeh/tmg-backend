@@ -49,7 +49,6 @@ public sealed class When_GettingWalletTransactions_WithExistingTransactions_Shou
         });
 
         _clientId = Guid.CreateVersion7();
-        _client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         await CreateVerifiedUserAsync();
         await SeedWalletTransactionsAsync();
         await AuthenticateAsync();

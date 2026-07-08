@@ -1,3 +1,4 @@
+using TMG.Application.Authentication;
 using TMG.Application.Authentication.Constants;
 using TMG.Application.Authentication.Features.SignIn;
 using TMG.Application.Authentication.Features.GoogleSignIn;
@@ -16,6 +17,7 @@ using TMG.Domain.Common.Messaging;
 using TMG.Domain.Common.Observability;
 using TMG.Domain.Common.Persistence;
 using TMG.Domain.Stakeholders.Entities;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace TMG.Application.UnitTests.Authentication;
@@ -37,6 +39,7 @@ internal sealed class AuthenticationFlowTestContext
     public StakeholderResolver StakeholderResolver => new(StakeholderRepository);
     public IUnitOfWork UnitOfWork { get; } = Substitute.For<IUnitOfWork>();
     public IUnitOfWorkTransaction Transaction { get; } = Substitute.For<IUnitOfWorkTransaction>();
+    public Guid DefaultClientId { get; } = Guid.CreateVersion7();
 
     public AuthenticationFlowTestContext()
     {
@@ -50,6 +53,7 @@ internal sealed class AuthenticationFlowTestContext
         StakeholderTypeRepository,
         StakeholderRepository,
         CustomTelemetryContext,
+        Options.Create(new ClientOnboardingOptions { DefaultClientId = DefaultClientId }),
         UnitOfWork);
     public GoogleSignUpHandler CreateGoogleSignUpHandler() => new(
         IdentityService,
@@ -58,6 +62,7 @@ internal sealed class AuthenticationFlowTestContext
         StakeholderTypeRepository,
         StakeholderRepository,
         CustomTelemetryContext,
+        Options.Create(new ClientOnboardingOptions { DefaultClientId = DefaultClientId }),
         UnitOfWork);
     public SignUpOtpHandler CreateSignUpOtpHandler() => new(
         IdentityService,

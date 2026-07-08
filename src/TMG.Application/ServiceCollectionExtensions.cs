@@ -44,12 +44,21 @@ using TMG.Application.Tenancies.Features.UploadTenancyDocument;
 using TMG.Application.Stakeholders.Features.GetMyProfile;
 using TMG.Application.Stakeholders.Features.UpdateProfile;
 using TMG.Application.Stakeholders.Features.UploadAvatar;
+using TMG.Application.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TMG.Application;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<ClientOnboardingOptions>(configuration.GetSection(ClientOnboardingOptions.SectionName));
+
+        return services.AddApplication();
+    }
+
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<StakeholderResolver>();
