@@ -35,7 +35,6 @@ public sealed class WhenCompletingPasswordResetWithValidOtp_Should(ContainersFix
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateUserAndOtpAsync();
     }

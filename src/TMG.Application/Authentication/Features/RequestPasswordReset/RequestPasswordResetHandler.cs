@@ -17,8 +17,6 @@ public sealed class RequestPasswordResetHandler(
 {
     public async Task<RequestPasswordResetResult> HandleAsync(RequestPasswordResetCommand request, CancellationToken cancellationToken)
     {
-        var clientId = request.ActorContext.ClientId
-            ?? throw new InvalidOperationException("Client id is required to request a password reset.");
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         var user = await identityService.FindByEmailAsync(normalizedEmail);
         if (user is null)
@@ -36,7 +34,7 @@ public sealed class RequestPasswordResetHandler(
             new ResetPasswordCommand
             {
                 StakeholderId = stakeholder.Id,
-                ClientId = clientId
+                ClientId = stakeholder.ClientId
             },
             cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -60,7 +60,8 @@ public sealed class RefreshSessionHandler(
         var accessToken = accessTokenService.Generate(
             user,
             currentStakeholder.Id,
-            currentStakeholder.StakeholderType?.Key ?? string.Empty);
+            currentStakeholder.StakeholderType?.Key ?? string.Empty,
+            currentStakeholder.ClientId);
         var refreshToken = await refreshTokenService.RotateAsync(currentRefreshToken, user, cancellationToken);
 
         await PublishTokenRefreshedAsync(

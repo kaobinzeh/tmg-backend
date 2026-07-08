@@ -36,7 +36,6 @@ public sealed class When_SettingPaymentProviderActivation_WithExistingProvider_S
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         await CreateVerifiedUserAsync();
         await SeedPaymentProviderAsync();
         await AuthenticateAsync();

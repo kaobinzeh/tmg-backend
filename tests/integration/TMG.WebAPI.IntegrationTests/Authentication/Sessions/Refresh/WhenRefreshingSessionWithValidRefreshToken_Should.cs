@@ -36,7 +36,6 @@ public sealed class WhenRefreshingSessionWithValidRefreshToken_Should(Containers
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateVerifiedUserAsync();
     }

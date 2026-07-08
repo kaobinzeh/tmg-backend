@@ -40,7 +40,7 @@ public sealed class When_RefreshingSession_WithValidRefreshToken_Should
                 Arg.Any<ISpecification<Stakeholder>>(),
                 Arg.Any<CancellationToken>())
             .Returns(stakeholder);
-        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>())
+        context.AccessTokenService.Generate(user, stakeholder.Id, Arg.Any<string>(), Arg.Any<Guid>())
             .Returns(new AccessToken("new-access-token", context.Clock.GetUtcNow().AddMinutes(15)));
         context.RefreshTokenService.RotateAsync(storedRefreshToken, user, Arg.Any<CancellationToken>())
             .Returns(new RefreshToken("new-refresh-token", context.Clock.GetUtcNow().AddDays(7)));

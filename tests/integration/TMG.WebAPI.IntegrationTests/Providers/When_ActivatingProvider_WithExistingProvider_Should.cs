@@ -38,7 +38,6 @@ public sealed class When_ActivatingProvider_WithExistingProvider_Should(Containe
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateVerifiedUserAsync();
         await SeedProvidersAsync();
