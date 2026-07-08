@@ -37,7 +37,6 @@ public sealed class When_UploadingAvatar_WithAuthenticatedStakeholder_Should(Con
     {
         await InitializeClientAsync();
         _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
         await CreateVerifiedUserAsync();
         await SeedFileStorageProviderAsync();

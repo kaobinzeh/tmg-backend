@@ -26,7 +26,6 @@ public sealed class When_GettingCurrencies_WithAvailableCurrencies_Should(Contai
     public async Task InitializeAsync()
     {
         await InitializeClientAsync();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", Guid.CreateVersion7().ToString());
         await SeedCurrencyAsync();
         await RemoveCachedCurrenciesAsync();
     }

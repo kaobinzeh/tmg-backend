@@ -16,8 +16,14 @@ namespace TMG.WebAPI.IntegrationTests;
 
 [Collection(nameof(ContainersCollection))]
 public sealed class WhenSigningUpWithGoogleIdentity_Should(ContainersFixture fixture)
-    : WebApiIntegrationTestBase(fixture), IAsyncLifetime
+    : WebApiIntegrationTestBase(fixture, DefaultClientConfiguration), IAsyncLifetime
 {
+    private static readonly Guid DefaultClientId = Guid.CreateVersion7();
+    private static readonly Dictionary<string, string?> DefaultClientConfiguration = new()
+    {
+        ["Clients:Onboarding:DefaultClientId"] = DefaultClientId.ToString()
+    };
+
     private string _email = string.Empty;
     private Guid _clientId;
     private Guid _countryId;
@@ -29,8 +35,7 @@ public sealed class WhenSigningUpWithGoogleIdentity_Should(ContainersFixture fix
     public async Task InitializeAsync()
     {
         await InitializeClientAsync();
-        _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
+        _clientId = DefaultClientId;
         _countryId = await ResolveCountryIdAsync();
         await EnsureDefaultStakeholderTypeExistsAsync();
     }

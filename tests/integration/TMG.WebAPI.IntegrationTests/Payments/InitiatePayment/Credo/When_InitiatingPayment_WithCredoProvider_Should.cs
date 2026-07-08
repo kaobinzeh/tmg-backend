@@ -68,7 +68,6 @@ public sealed class When_InitiatingPayment_WithCredoProvider_Should : IAsyncLife
         });
 
         _clientId = Guid.CreateVersion7();
-        _client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         await CreateVerifiedUserAsync();
         await SeedPaymentSetupAsync();
         await AuthenticateAsync();

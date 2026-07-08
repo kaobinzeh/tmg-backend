@@ -51,7 +51,6 @@ public sealed class When_GettingWalletTopUpTransactionDetail_WithExistingTransac
         });
 
         _clientId = Guid.CreateVersion7();
-        _client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         await CreateVerifiedUserAsync();
         await SeedWalletTopUpTransactionAsync();
         await AuthenticateAsync();

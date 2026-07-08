@@ -19,7 +19,6 @@ public sealed class WhenUnhandledExceptionIsThrown_Should(ContainersFixture fixt
     private const string Password = "P@ssw0rd123!";
 
     private string _email = string.Empty;
-    private Guid _clientId;
     private Guid _countryId;
     private bool _createdCountryForTest;
     private HttpResponseMessage? _response;
@@ -27,8 +26,6 @@ public sealed class WhenUnhandledExceptionIsThrown_Should(ContainersFixture fixt
     public async Task InitializeAsync()
     {
         await InitializeClientAsync();
-        _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
         _countryId = await ResolveCountryIdAsync();
     }
 

@@ -11,19 +11,19 @@ namespace TMG.WebAPI.UnitTests;
 public sealed class WhenResolvingCurrentActorForAuthenticatedStakeholder_Should
 {
     [Fact]
-    public async Task UseStakeholderId()
+    public async Task UseStakeholderIdAndClientIdClaims()
     {
         var stakeholderId = Guid.CreateVersion7();
+        var clientId = Guid.CreateVersion7();
         var currentActorAccessor = new FakeCurrentActorAccessor();
         var stakeholderRepository = new FakeStakeholderReadModelRepository();
-        var problemDetailsService = Substitute.For<IProblemDetailsService>();
         var httpContext = new DefaultHttpContext();
         httpContext.TraceIdentifier = Guid.CreateVersion7().ToString("N");
-        httpContext.Request.Headers["X-Client-Id"] = Guid.CreateVersion7().ToString();
         httpContext.User = new ClaimsPrincipal(
             new ClaimsIdentity(
                 [
                     new Claim(CustomClaimTypes.StakeholderId, stakeholderId.ToString()),
+                    new Claim(CustomClaimTypes.ClientId, clientId.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, Guid.CreateVersion7().ToString())
                 ],
                 "Bearer"));
@@ -35,9 +35,10 @@ public sealed class WhenResolvingCurrentActorForAuthenticatedStakeholder_Should
             return Task.CompletedTask;
         });
 
-        await sut.InvokeAsync(httpContext, currentActorAccessor, stakeholderRepository, problemDetailsService);
+        await sut.InvokeAsync(httpContext, currentActorAccessor, stakeholderRepository);
 
         currentActorAccessor.ActorId.ShouldBe(stakeholderId.ToString());
+        currentActorAccessor.ClientId.ShouldBe(clientId);
         nextWasCalled.ShouldBeTrue();
         stakeholderRepository.Calls.ShouldBe(0);
     }

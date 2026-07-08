@@ -37,7 +37,6 @@ public abstract class PropertyManagerIntegrationTestBase(ContainersFixture fixtu
     {
         await InitializeClientAsync();
         ClientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", ClientId.ToString());
         CountryId = await ResolveCountryIdAsync();
         await CreateVerifiedManagerAsync();
         await AuthenticateAsync();

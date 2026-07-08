@@ -1,3 +1,4 @@
+using TMG.Application.Authentication;
 using TMG.Application.Authentication.Constants;
 using TMG.Application.Authentication.Features.CompletePasswordReset;
 using TMG.Application.Authentication.Features.GoogleSignIn;
@@ -16,6 +17,7 @@ using TMG.Domain.Common.Messaging;
 using TMG.Domain.Common.Observability;
 using TMG.Domain.Common.Persistence;
 using TMG.Domain.Stakeholders.Entities;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace TMG.WebAPI.UnitTests.Features.Authentication;
@@ -38,6 +40,7 @@ internal sealed class AuthenticationControllerTestContext
     public IUnitOfWork UnitOfWork { get; } = Substitute.For<IUnitOfWork>();
     public IUnitOfWorkTransaction Transaction { get; } = Substitute.For<IUnitOfWorkTransaction>();
     public StakeholderResolver StakeholderResolver => new(StakeholderRepository);
+    public Guid DefaultClientId { get; } = Guid.CreateVersion7();
 
     public AuthenticationControllerTestContext()
     {
@@ -54,6 +57,7 @@ internal sealed class AuthenticationControllerTestContext
         StakeholderTypeRepository,
         StakeholderRepository,
         CustomTelemetryContext,
+        Options.Create(new ClientOnboardingOptions { DefaultClientId = DefaultClientId }),
         UnitOfWork);
 
     public GoogleSignUpHandler CreateGoogleSignUpHandler() => new(
@@ -63,6 +67,7 @@ internal sealed class AuthenticationControllerTestContext
         StakeholderTypeRepository,
         StakeholderRepository,
         CustomTelemetryContext,
+        Options.Create(new ClientOnboardingOptions { DefaultClientId = DefaultClientId }),
         UnitOfWork);
 
     public SignInHandler CreateSignInHandler() => new(

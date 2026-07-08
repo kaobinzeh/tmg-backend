@@ -8,6 +8,7 @@ using TMG.Domain.Common.Persistence;
 using TMG.Domain.Stakeholders.Entities;
 using TMG.Domain.Stakeholders.Specifications;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace TMG.Application.Authentication.Features.SignUp;
 
@@ -17,6 +18,7 @@ public sealed class SignUpHandler(
     IRepository<StakeholderType> stakeholderTypeRepository,
     IRepository<Stakeholder> stakeholderRepository,
     ICustomTelemetryContext customTelemetryContext,
+    IOptions<ClientOnboardingOptions> clientOnboardingOptions,
     IUnitOfWork unitOfWork)
 {
     public async Task<SignUpResult> HandleAsync(SignUpCommand request, CancellationToken cancellationToken)
@@ -35,8 +37,9 @@ public sealed class SignUpHandler(
         }
 
         var user = AppUser.Create(request.Email);
-        var clientId = request.ActorContext.ClientId
-            ?? throw new InvalidOperationException("Client id is required to sign up.");
+        var clientId = clientOnboardingOptions.Value.DefaultClientId
+            ?? throw new InvalidOperationException(
+                $"'{ClientOnboardingOptions.SectionName}:{nameof(ClientOnboardingOptions.DefaultClientId)}' must be configured to sign up.");
         await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
         var createResult = await identityService.CreateAsync(user, request.Password);

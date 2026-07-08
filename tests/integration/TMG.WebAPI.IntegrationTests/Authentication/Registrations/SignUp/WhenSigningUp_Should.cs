@@ -15,9 +15,15 @@ namespace TMG.WebAPI.IntegrationTests;
 
 [Collection(nameof(ContainersCollection))]
 public sealed class WhenSigningUp_Should(ContainersFixture fixture)
-    : WebApiIntegrationTestBase(fixture), IAsyncLifetime
+    : WebApiIntegrationTestBase(fixture, DefaultClientConfiguration), IAsyncLifetime
 {
     private const string Password = "P@ssw0rd123!";
+
+    private static readonly Guid DefaultClientId = Guid.CreateVersion7();
+    private static readonly Dictionary<string, string?> DefaultClientConfiguration = new()
+    {
+        ["Clients:Onboarding:DefaultClientId"] = DefaultClientId.ToString()
+    };
 
     private string _email = string.Empty;
     private Guid _clientId;
@@ -29,8 +35,7 @@ public sealed class WhenSigningUp_Should(ContainersFixture fixture)
     public async Task InitializeAsync()
     {
         await InitializeClientAsync();
-        _clientId = Guid.CreateVersion7();
-        Client.DefaultRequestHeaders.Add("X-Client-Id", _clientId.ToString());
+        _clientId = DefaultClientId;
         _countryId = await ResolveCountryIdAsync();
         await EnsureDefaultStakeholderTypeExistsAsync();
     }
