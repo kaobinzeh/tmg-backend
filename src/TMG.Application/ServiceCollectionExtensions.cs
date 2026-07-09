@@ -19,6 +19,7 @@ using TMG.Application.Payments.Features.ProcessSafeHavenWebhook;
 using TMG.Application.Payments.Features.ReconcilePayments;
 using TMG.Application.Properties.Features.AddUnit;
 using TMG.Application.Properties.Features.CreateProperty;
+using TMG.Application.Properties.Features.GetProperty;
 using TMG.Application.Properties.Features.ListProperties;
 using TMG.Application.Properties.Features.ListUnits;
 using TMG.Application.Properties.Features.SetUnitAvailability;
@@ -90,6 +91,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<PaymentReconciliationService>();
         services.AddScoped<CreatePropertyHandler>();
         services.AddScoped<ListPropertiesHandler>();
+        services.AddScoped<GetPropertyHandler>();
         services.AddScoped<AddUnitHandler>();
         services.AddScoped<ListUnitsHandler>();
         services.AddScoped<UpdateUnitRentHandler>();

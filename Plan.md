@@ -71,7 +71,7 @@ WebAPI feature folder, routes in `EndpointUrl.cs`, handlers registered in `Appli
 
 **Application slices** (`src/TMG.Application/Properties/Features/`): `CreateProperty`, `ListProperties`, `GetProperty`, `AddUnit`, `ListUnits`, `UpdateUnitRent` (the "review rent" job), `SetUnitAvailability`.
 
-**WebAPI** (`src/TMG.WebAPI/Features/Properties/`): `PropertiesController` + `UnitsController`, request DTOs + validators; add `EndpointUrl.Properties`/`Units`; `[Authorize]` + manager-role check.
+**WebAPI** (`src/TMG.WebAPI/Features/Properties/`): `PropertiesController` + `UnitsController`, request DTOs + validators; add `EndpointUrl.Properties`/`Units`; `[Authorize]` + manager-role check. ✅ (manager check via `require-manager` policy on the `stakeholder_type` JWT claim)
 
 **Tests:** domain unit tests, handler unit tests, one integration happy-path per endpoint.
 
@@ -126,6 +126,6 @@ WebAPI feature folder, routes in `EndpointUrl.cs`, handlers registered in `Appli
 
 ## Cross-cutting (every phase)
 
-- **Authorization:** manager-only vs tenant-only endpoints via stakeholder type/role; always scope queries by `ActorContext.ClientId`.
+- **Authorization:** manager-only vs tenant-only endpoints via stakeholder type/role; always scope queries by `ActorContext.ClientId`. ✅ (`require-manager` policy guards all manager endpoints; tenant self-scoped endpoints stay session-gated; documents use `TenancyDocumentAccessGuard`)
 - **Testing (AGENTS.md):** NSubstitute + Shouldly, one case per file, `When_{Action}_With{Params}_Should`, integration = happy-path only with `IAsyncLifetime`. Run `dotnet build` then `dotnet test` **sequentially**.
 - **Conventions:** `TimeProvider` for cycle math, `Guid.CreateVersion7()`, explicit `CancellationToken`, sealed records.

@@ -71,6 +71,7 @@ public static class EndpointUrl
     {
         public const string Route = $"api/{Versions.V1Route}/properties";
         public static readonly string V1 = ToV1(Route);
+        public static string ByIdV1(Guid propertyId) => $"{V1}/{propertyId}";
         public static string UnitsV1(Guid propertyId) => $"{V1}/{propertyId}/units";
     }
 

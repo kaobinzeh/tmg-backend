@@ -12,7 +12,7 @@ namespace TMG.WebAPI.Features.Properties;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+[Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
 [Route(EndpointUrl.Units.Route)]
 public sealed class UnitsController(
     UpdateUnitRentHandler updateUnitRentHandler,
