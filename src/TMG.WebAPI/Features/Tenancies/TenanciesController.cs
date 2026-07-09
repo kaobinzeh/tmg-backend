@@ -42,7 +42,7 @@ public sealed class TenanciesController(
     ICurrentActor currentActor) : ControllerBase
 {
     [HttpPost("allocations")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<AllocateUnitResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -190,7 +190,7 @@ public sealed class TenanciesController(
     }
 
     [HttpPost("allocations/{tenancyId:guid}/activate")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -224,7 +224,7 @@ public sealed class TenanciesController(
     }
 
     [HttpPost("allocations/{tenancyId:guid}/payments")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<RecordRentPaymentResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -267,7 +267,7 @@ public sealed class TenanciesController(
     }
 
     [HttpGet("allocations/{tenancyId:guid}/cycle")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<TenancyCycleDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -288,7 +288,7 @@ public sealed class TenanciesController(
     }
 
     [HttpGet("allocations/upcoming-renewals")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<IReadOnlyList<UpcomingRenewalListItem>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IReadOnlyList<UpcomingRenewalListItem>>> ListUpcomingRenewals(
@@ -309,7 +309,7 @@ public sealed class TenanciesController(
     }
 
     [HttpGet("allocations")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<IReadOnlyList<TenancyAllocationListItem>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -358,7 +358,7 @@ public sealed class TenanciesController(
     }
 
     [HttpGet("summary")]
-    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireManager)]
     [ProducesResponseType<TenancySummaryDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TenancySummaryDto>> GetSummary(

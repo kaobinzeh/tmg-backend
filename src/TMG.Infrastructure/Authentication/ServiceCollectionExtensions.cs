@@ -1,3 +1,4 @@
+using TMG.Application.Authentication.Constants;
 using TMG.Domain.Common.Caching;
 using TMG.Domain.Common.Authentication;
 using TMG.Domain.Authentication.Entities;
@@ -136,6 +137,12 @@ public static class ServiceCollectionExtensions
                 AuthorizationPolicyNames.RequireActiveSession,
                 policy => policy
                     .RequireAuthenticatedUser()
+                    .AddRequirements(new ActiveSessionRequirement()));
+            options.AddPolicy(
+                AuthorizationPolicyNames.RequireManager,
+                policy => policy
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(CustomClaimTypes.StakeholderType, StakeholderDefaults.Types.ManagerKey)
                     .AddRequirements(new ActiveSessionRequirement()));
         });
 
