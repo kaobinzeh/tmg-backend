@@ -45,6 +45,7 @@ jobs:
         with:
           name: build-artifacts
           if-no-files-found: warn
+          retention-days: 1
           path: |
             src/**/bin/Release/**
             tests/**/bin/Release/**
