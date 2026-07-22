@@ -17,6 +17,7 @@ public sealed class When_GettingStakeholderWalletTransactions_WithValidCursor_Sh
         var stakeholderId = Guid.CreateVersion7();
         var cursorTransactionId = Guid.CreateVersion7();
         var cursorCreatedAtUtc = context.Clock.GetUtcNow().AddMinutes(-5);
+        var firstTransactionId = Guid.CreateVersion7();
         StakeholderWalletTransactionsCursorRequest? capturedRequest = null;
 
         context.WalletTransactionReadModelRepository
@@ -26,7 +27,7 @@ public sealed class When_GettingStakeholderWalletTransactions_WithValidCursor_Sh
             .Returns(new StakeholderWalletTransactionsCursorPage(
                 [
                     new StakeholderWalletTransactionReadModel(
-                        Guid.CreateVersion7(),
+                        firstTransactionId,
                         WalletTransactionTitles.WalletFunding,
                         2500m,
                         "NGN",
@@ -59,6 +60,7 @@ public sealed class When_GettingStakeholderWalletTransactions_WithValidCursor_Sh
         capturedRequest.CursorTransactionId.ShouldBe(cursorTransactionId);
         capturedRequest.Limit.ShouldBe(2);
         result.Transactions.Count.ShouldBe(2);
+        result.Transactions[0].WalletTransactionId.ShouldBe(firstTransactionId);
         result.Transactions[0].TransactionTitle.ShouldBe(WalletTransactionTitles.WalletFunding);
         result.Transactions[0].TransactionType.ShouldBe(nameof(WalletTransactionType.Credit));
         result.Transactions[0].TransactionCategory.ShouldBe(nameof(WalletTransactionCategory.WalletFunding));

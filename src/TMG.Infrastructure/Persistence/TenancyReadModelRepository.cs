@@ -106,6 +106,25 @@ public sealed class TenancyReadModelRepository(AppReadDbContext dbContext) : ITe
         return new TenancyRentSummaryReadModel(collectedAmount, outstandingAmount, upcomingRenewalsCount);
     }
 
+    public async Task<IReadOnlyList<RentPaymentReadModel>> ListRentPaymentsByTenancyAsync(
+        Guid clientId,
+        Guid tenancyId,
+        CancellationToken cancellationToken) =>
+        await dbContext.RentPayments.AsNoTracking()
+            .Where(payment => payment.ClientId == clientId && payment.TenancyId == tenancyId)
+            .OrderByDescending(payment => payment.PaidAtUtc)
+            .Select(payment => new RentPaymentReadModel(
+                payment.Id,
+                payment.Amount,
+                payment.CurrencyId,
+                payment.Method,
+                payment.Reference,
+                payment.PaidAtUtc,
+                payment.PeriodStartUtc,
+                payment.PeriodEndUtc,
+                payment.ReceiptDocumentId))
+            .ToListAsync(cancellationToken);
+
     private async Task<IReadOnlyList<TenancyAllocationReadModel>> ProjectAllocationsAsync(
         IQueryable<Tenancy> tenancies,
         CancellationToken cancellationToken) =>

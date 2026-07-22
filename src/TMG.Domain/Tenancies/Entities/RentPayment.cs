@@ -77,7 +77,10 @@ public sealed class RentPayment : Entity, IAggregateRoot
     public Guid? ReceiptDocumentId { get; private set; }
 
     /// <summary>Human-readable receipt number derived from the ledger id, e.g. <c>RCPT-01AB23CD</c>.</summary>
-    public string ReceiptNumber => $"RCPT-{Id.ToString("N")[..8].ToUpperInvariant()}";
+    public string ReceiptNumber => FormatReceiptNumber(Id);
+
+    /// <summary>Derives the human-readable receipt number from a rent-payment id, e.g. <c>RCPT-01AB23CD</c>.</summary>
+    public static string FormatReceiptNumber(Guid rentPaymentId) => $"RCPT-{rentPaymentId.ToString("N")[..8].ToUpperInvariant()}";
 
     public static RentPayment Record(
         Guid clientId,

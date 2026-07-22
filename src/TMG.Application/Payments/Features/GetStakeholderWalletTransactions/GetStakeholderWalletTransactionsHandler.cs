@@ -24,6 +24,7 @@ public sealed class GetStakeholderWalletTransactionsHandler(IWalletTransactionRe
 
         var transactions = page.Transactions
             .Select(transaction => new GetStakeholderWalletTransactionsResponse(
+                transaction.WalletTransactionId,
                 transaction.TransactionTitle,
                 transaction.Amount,
                 transaction.CurrencyCode,

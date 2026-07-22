@@ -7,6 +7,7 @@ using TMG.Application.Tenancies.Features.GetTenancyCycle;
 using TMG.Application.Tenancies.Features.GetTenancySummary;
 using TMG.Application.Tenancies.Features.ListMyTenancies;
 using TMG.Application.Tenancies.Features.ListTenancyAllocations;
+using TMG.Application.Tenancies.Features.ListTenancyRentPayments;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Domain.Tenancies.Entities;
 using TMG.Application.Tenancies.Features.RecordRentPayment;
@@ -30,6 +31,7 @@ public sealed class TenanciesController(
     UploadTenancyDocumentHandler uploadTenancyDocumentHandler,
     ActivateTenancyHandler activateTenancyHandler,
     RecordRentPaymentHandler recordRentPaymentHandler,
+    ListTenancyRentPaymentsHandler listTenancyRentPaymentsHandler,
     GetTenancyCycleHandler getTenancyCycleHandler,
     GetTenancySummaryHandler getTenancySummaryHandler,
     ListTenancyAllocationsHandler listTenancyAllocationsHandler,
@@ -263,6 +265,27 @@ public sealed class TenanciesController(
             _ => Created(
                 EndpointUrl.Tenancies.PaymentsV1(tenancyId),
                 new RecordRentPaymentResponse(result.RentPaymentId!.Value, result.ReceiptDocumentId))
+        };
+    }
+
+    [HttpGet("allocations/{tenancyId:guid}/payments")]
+    [Authorize(Policy = AuthorizationPolicyNames.RequireActiveSession)]
+    [ProducesResponseType<IReadOnlyList<RentPaymentListItem>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<RentPaymentListItem>>> ListRentPayments(
+        Guid tenancyId,
+        CancellationToken cancellationToken)
+    {
+        var result = await listTenancyRentPaymentsHandler.HandleAsync(
+            new ListTenancyRentPaymentsCommand(tenancyId, ActorContext.FromCurrentActor(currentActor)),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ListTenancyRentPaymentsStatus.NotAuthenticated => Unauthorized(),
+            ListTenancyRentPaymentsStatus.TenancyNotFound => NotFound(),
+            _ => Ok(result.Payments)
         };
     }
 
