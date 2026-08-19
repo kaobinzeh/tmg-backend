@@ -73,6 +73,7 @@ public sealed class When_GettingWalletTransactions_WithExistingTransactions_Shou
         var payload = await _response.Content.ReadFromJsonAsync<GetStakeholderWalletTransactionsResult>();
         payload.ShouldNotBeNull();
         payload.Transactions.Count.ShouldBe(1);
+        payload.Transactions[0].WalletTransactionId.ShouldBe(_secondWalletTransactionId);
         payload.Transactions[0].CurrencyCode.ShouldBe("NGN");
         payload.Transactions[0].TransactionType.ShouldBe(nameof(WalletTransactionType.Credit));
         payload.Transactions[0].TransactionCategory.ShouldBe(nameof(WalletTransactionCategory.BankTransferCredit));

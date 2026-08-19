@@ -29,4 +29,9 @@ public interface ITenancyReadModelRepository
         DateTimeOffset nowUtc,
         DateTimeOffset renewalHorizonUtc,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<RentPaymentReadModel>> ListRentPaymentsByTenancyAsync(
+        Guid clientId,
+        Guid tenancyId,
+        CancellationToken cancellationToken);
 }

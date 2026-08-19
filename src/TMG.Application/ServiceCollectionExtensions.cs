@@ -36,6 +36,7 @@ using TMG.Application.Tenancies.Features.GetTenancySummary;
 using TMG.Application.Tenancies.Features.ListMyTenancies;
 using TMG.Application.Tenancies.Features.ListTenancyAllocations;
 using TMG.Application.Tenancies.Features.ListTenancyDocuments;
+using TMG.Application.Tenancies.Features.ListTenancyRentPayments;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Application.Tenancies.Features.ProcessRentReminders;
 using TMG.Application.Tenancies.Features.RecordRentPayment;
@@ -106,6 +107,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RejectTenancyInvitationHandler>();
         services.AddScoped<UploadTenancyDocumentHandler>();
         services.AddScoped<RecordRentPaymentHandler>();
+        services.AddScoped<ListTenancyRentPaymentsHandler>();
         services.AddScoped<TenancyDocumentAccessGuard>();
         services.AddScoped<ListTenancyDocumentsHandler>();
         services.AddScoped<GetTenancyDocumentDownloadUrlHandler>();

@@ -7,6 +7,7 @@ using TMG.Application.Tenancies.Features.GetTenancyCycle;
 using TMG.Application.Tenancies.Features.GetTenancySummary;
 using TMG.Application.Tenancies.Features.ListMyTenancies;
 using TMG.Application.Tenancies.Features.ListTenancyAllocations;
+using TMG.Application.Tenancies.Features.ListTenancyRentPayments;
 using TMG.Application.Tenancies.Features.ListUpcomingRenewals;
 using TMG.Application.Tenancies.Features.RecordRentPayment;
 using TMG.Application.Tenancies.Features.RejectTenancyInvitation;
@@ -93,6 +94,7 @@ internal sealed class TenanciesControllerTestContext
                 EventPublisher,
                 UnitOfWork,
                 Clock),
+            new ListTenancyRentPaymentsHandler(TenancyRepository, TenancyReadModelRepository),
             new GetTenancyCycleHandler(TenancyRepository),
             new GetTenancySummaryHandler(TenancyReadModelRepository, Clock),
             new ListTenancyAllocationsHandler(TenancyReadModelRepository),

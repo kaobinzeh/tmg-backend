@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using TMG.Application.Tenancies.Features.ListTenancyRentPayments;
 using TMG.Domain.Common.Persistence;
 using TMG.Domain.Providers.Entities;
 using TMG.Domain.Tenancies.Entities;
@@ -33,6 +34,7 @@ public sealed class When_RecordingRentPayment_Should(ContainersFixture fixture)
 
         await ThenTheInitialPaymentSettlesTheCurrentTerm();
         await ThenTheRenewalPaymentAdvancesTheCycle();
+        await ThenBothPaymentsCanBeListedForTheTenancy();
 
         async Task ThenTheInitialPaymentSettlesTheCurrentTerm()
         {
@@ -75,6 +77,22 @@ public sealed class When_RecordingRentPayment_Should(ContainersFixture fixture)
             var tenancy = await dbContext.Tenancies.FirstAsync(item => item.Id == tenant.TenancyId);
             tenancy.CycleEndUtc.ShouldBe(leaseStart.AddMonths(24));
             tenancy.NextRentDueUtc.ShouldBe(leaseStart.AddMonths(24));
+        }
+
+        async Task ThenBothPaymentsCanBeListedForTheTenancy()
+        {
+            _response?.Dispose();
+            _response = await Client.GetAsync(EndpointUrl.Tenancies.PaymentsV1(tenant.TenancyId));
+            _response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+            var payments = await _response.Content.ReadFromJsonAsync<IReadOnlyList<RentPaymentListItem>>();
+            payments.ShouldNotBeNull();
+            payments.Count.ShouldBe(2);
+            payments.Select(payment => payment.Reference).ShouldBe(["TRF-INITIAL", "TRF-RENEWAL"], ignoreOrder: true);
+            payments.ShouldAllBe(payment => payment.Amount == 1_500_000m);
+            payments.ShouldAllBe(payment => payment.Method == nameof(RentPaymentMethod.BankTransfer));
+            payments.ShouldAllBe(payment => payment.ReceiptDocumentId != null);
+            payments.ShouldAllBe(payment => payment.ReceiptNumber.StartsWith("RCPT-"));
         }
 
         async Task<RecordRentPaymentResponse> RecordPaymentAsync(string reference)
