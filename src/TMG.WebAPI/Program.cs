@@ -12,6 +12,7 @@ using TMG.WebAPI.Features.Authentication.Registrations;
 using TMG.WebAPI.Infrastructure.ApiDocumentation;
 using TMG.WebAPI.Infrastructure.Cors;
 using TMG.WebAPI.Infrastructure;
+using TMG.WebAPI.Infrastructure.Proxy;
 using TMG.WebAPI.Infrastructure.RateLimiting;
 using FluentValidation;
 
@@ -44,6 +45,7 @@ builder.Services.AddIdentityUserManagement(builder.Configuration);
 builder.Services.AddAuthenticationServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRequestRateLimiting(builder.Configuration);
+builder.Services.AddProxyForwardedHeaders(builder.Configuration);
 builder.Services.AddFrontendCors(builder.Configuration);
 builder.Services.AddRedisCaching(builder.Configuration);
 builder.Services.AddObjectStorage(builder.Configuration);
@@ -55,9 +57,10 @@ builder.Services.AddBackendTelemetry(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseProxyForwardedHeaders();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.UseCors(CorsPolicyNames.Frontend);
+app.UseFrontendCors();
 app.UseAuthentication();
 app.UseMiddleware<CurrentActorMiddleware>();
 app.UseAuthorization();
