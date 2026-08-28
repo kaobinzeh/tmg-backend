@@ -1,3 +1,11 @@
+extensions:
+  # Grafana Cloud authenticates the OTLP gateway with HTTP basic auth:
+  # username = numeric stack/instance id, password = Cloud Access Policy token.
+  basicauth/grafanacloud:
+    client_auth:
+      username: ${env:GRAFANA_CLOUD_INSTANCE_ID}
+      password: ${env:GRAFANA_CLOUD_API_TOKEN}
+
 receivers:
   otlp:
     protocols:
@@ -6,32 +14,79 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
+  # The apps expose metrics through the OpenTelemetry Prometheus exporter
+  # (/metrics), not over OTLP. This receiver replaces the self-hosted
+  # Prometheus server that used to scrape them.
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: tmg-webapi
+          scrape_interval: 30s
+          metrics_path: /metrics
+          static_configs:
+            - targets:
+                - webapi:8080
+        - job_name: tmg-consumer
+          scrape_interval: 30s
+          metrics_path: /metrics
+          static_configs:
+            - targets:
+                - consumer:8080
+
 processors:
+  # Guard against the collector ballooning if Grafana Cloud is unreachable.
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 75
+    spike_limit_percentage: 20
   batch:
 
 exporters:
-  otlp/tempo:
-    endpoint: tempo:4317
-    tls:
-      insecure: true
-  otlphttp/loki:
-    endpoint: http://loki:3100/otlp
-    tls:
-      insecure: true
+  otlp_http/grafanacloud:
+    endpoint: ${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
+    auth:
+      authenticator: basicauth/grafanacloud
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+
+  # Local self-hosted backends, disabled in favour of Grafana Cloud.
+  # otlp/tempo:
+    # endpoint: tempo:4317
+    # tls:
+      # insecure: true
+  # otlp_http/loki:
+    # endpoint: http://loki:3100/otlp
+    # tls:
+      # insecure: true
 
 service:
+  extensions:
+    - basicauth/grafanacloud
   pipelines:
     traces:
       receivers:
         - otlp
       processors:
+        - memory_limiter
         - batch
       exporters:
-        - otlp/tempo
+        - otlp_http/grafanacloud
     logs:
       receivers:
         - otlp
       processors:
+        - memory_limiter
         - batch
       exporters:
-        - otlphttp/loki
+        - otlp_http/grafanacloud
+    metrics:
+      receivers:
+        - otlp
+        - prometheus
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        - otlp_http/grafanacloud
