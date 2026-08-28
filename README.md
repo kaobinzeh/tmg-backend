@@ -114,10 +114,14 @@ Useful endpoints:
 - Health: `http://localhost:8080/health`
 - RabbitMQ: `amqp://localhost:5672`
 - RabbitMQ Management: `http://localhost:15672`
-- Grafana: `http://localhost:3000`
-- Prometheus: `http://localhost:9090`
-- Tempo: `http://localhost:3200`
-- Pyroscope: `http://localhost:4040`
+
+The self-hosted Grafana, Prometheus, Tempo, Loki, and Pyroscope services are commented out in
+`docker-compose.yml` to keep the deployed footprint small. The OTel collector still runs and now
+forwards traces, logs, and metrics to Grafana Cloud — set `GRAFANA_CLOUD_OTLP_ENDPOINT`,
+`GRAFANA_CLOUD_INSTANCE_ID`, and `GRAFANA_CLOUD_API_TOKEN` (see `docker-compose.env.example.sh`) and
+view them in your Grafana Cloud stack. The collector exits at startup if the endpoint is unset, so
+these are required for `docker compose up` to come up clean. Metrics that Prometheus used to scrape from `/metrics` are now
+scraped by the collector itself. Uncomment those services to run the whole stack locally again.
 
 The `consumer` and `jobs` containers expose internal `/health/readiness` and `/health/liveness` endpoints for orchestration. In `docker compose`, both services wait for the database migrator to complete successfully before starting.
 
@@ -165,17 +169,16 @@ so a mis-seeded database is caught at deploy time instead of on the first regist
 
 ## Profiling
 
-The local observability stack includes Grafana Pyroscope for continuous profiling.
+Continuous profiling is currently disabled. The `pyroscope` service and the `PYROSCOPE_*` /
+`CORECLR_PROFILER*` environment variables on `webapi`, `consumer`, and `jobs` are commented out in
+`docker-compose.yml`, because a self-hosted Pyroscope server is the most memory-hungry part of the
+stack and Grafana Cloud's free tier does not include profiles.
 
-- Grafana provisions a `Pyroscope` data source automatically.
-- The `webapi`, `consumer`, and `jobs` containers are built with the native .NET Pyroscope profiler and push profiles directly to `http://pyroscope:4040`.
-- The current profiling setup is container-only. Grafana's .NET profiler currently supports Linux on `amd64`, so `dotnet run` on Windows/macOS is not profiled by this configuration.
-
-After `docker compose up --build`, open Grafana at `http://localhost:3000` and use Profiles Drilldown or Explore with the `Pyroscope` data source to inspect:
-
-- `tmg.webapi`
-- `tmg.consumer`
-- `tmg.jobs`
+The images are still built with the native .NET Pyroscope profiler, so re-enabling is just a matter
+of uncommenting the `pyroscope` service and those environment blocks. Note that the profiler is
+container-only: Grafana's .NET profiler supports Linux on `amd64`, so `dotnet run` on Windows/macOS
+is not profiled either way. Once re-enabled, the profiled applications are `tmg.webapi`,
+`tmg.consumer`, and `tmg.jobs`.
 
 Default SQL Server credentials in the template:
 

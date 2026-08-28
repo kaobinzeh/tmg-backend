@@ -45,19 +45,20 @@ services:
       Notifications__Email__Mailtrap__WebhookSigningSecret: ${MAILTRAP_WEBHOOK_SIGNING_SECRET}
       OpenTelemetry__ServiceName: TMG.WebAPI
       OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
-      PYROSCOPE_APPLICATION_NAME: tmg.webapi
-      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
-      PYROSCOPE_PROFILING_ENABLED: "1"
-      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
-      CORECLR_ENABLE_PROFILING: "1"
-      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
-      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
-      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
-      LD_LIBRARY_PATH: /dotnet
-      DOTNET_EnableDiagnostics: "1"
-      DOTNET_EnableDiagnostics_IPC: "0"
-      DOTNET_EnableDiagnostics_Debugger: "0"
-      DOTNET_EnableDiagnostics_Profiler: "1"
+      # Pyroscope profiling disabled (no self-hosted Pyroscope server).
+      # PYROSCOPE_APPLICATION_NAME: tmg.webapi
+      # PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      # PYROSCOPE_PROFILING_ENABLED: "1"
+      # PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      # CORECLR_ENABLE_PROFILING: "1"
+      # CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      # CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      # LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      # LD_LIBRARY_PATH: /dotnet
+      # DOTNET_EnableDiagnostics: "1"
+      # DOTNET_EnableDiagnostics_IPC: "0"
+      # DOTNET_EnableDiagnostics_Debugger: "0"
+      # DOTNET_EnableDiagnostics_Profiler: "1"
       Database__InitializeOnStartup: "false"
     depends_on:
       database-migrator:
@@ -66,12 +67,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      prometheus:
-        condition: service_started
+      # prometheus:
+        # condition: service_started
       otel-collector:
         condition: service_started
-      pyroscope:
-        condition: service_started
+      # pyroscope:
+        # condition: service_started
     ports:
       - "8080:8080"
     healthcheck:
@@ -106,19 +107,20 @@ services:
       Notifications__Email__Mailtrap__ApiToken: ${MAILTRAP_TOKEN}
       OpenTelemetry__ServiceName: TMG.Consumer
       OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
-      PYROSCOPE_APPLICATION_NAME: tmg.consumer
-      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
-      PYROSCOPE_PROFILING_ENABLED: "1"
-      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
-      CORECLR_ENABLE_PROFILING: "1"
-      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
-      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
-      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
-      LD_LIBRARY_PATH: /dotnet
-      DOTNET_EnableDiagnostics: "1"
-      DOTNET_EnableDiagnostics_IPC: "0"
-      DOTNET_EnableDiagnostics_Debugger: "0"
-      DOTNET_EnableDiagnostics_Profiler: "1"
+      # Pyroscope profiling disabled (no self-hosted Pyroscope server).
+      # PYROSCOPE_APPLICATION_NAME: tmg.consumer
+      # PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      # PYROSCOPE_PROFILING_ENABLED: "1"
+      # PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      # CORECLR_ENABLE_PROFILING: "1"
+      # CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      # CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      # LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      # LD_LIBRARY_PATH: /dotnet
+      # DOTNET_EnableDiagnostics: "1"
+      # DOTNET_EnableDiagnostics_IPC: "0"
+      # DOTNET_EnableDiagnostics_Debugger: "0"
+      # DOTNET_EnableDiagnostics_Profiler: "1"
     depends_on:
       database-migrator:
         condition: service_healthy
@@ -130,8 +132,8 @@ services:
         condition: service_healthy
       otel-collector:
         condition: service_started
-      pyroscope:
-        condition: service_started
+      # pyroscope:
+        # condition: service_started
     ports:
       - "8082:8080"
     healthcheck:
@@ -165,19 +167,20 @@ services:
       Messaging__RabbitMq__CommandsExchange: x.commands.tmg
       OpenTelemetry__ServiceName: TMG.Jobs
       OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
-      PYROSCOPE_APPLICATION_NAME: tmg.jobs
-      PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
-      PYROSCOPE_PROFILING_ENABLED: "1"
-      PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
-      CORECLR_ENABLE_PROFILING: "1"
-      CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
-      CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
-      LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
-      LD_LIBRARY_PATH: /dotnet
-      DOTNET_EnableDiagnostics: "1"
-      DOTNET_EnableDiagnostics_IPC: "0"
-      DOTNET_EnableDiagnostics_Debugger: "0"
-      DOTNET_EnableDiagnostics_Profiler: "1"
+      # Pyroscope profiling disabled (no self-hosted Pyroscope server).
+      # PYROSCOPE_APPLICATION_NAME: tmg.jobs
+      # PYROSCOPE_SERVER_ADDRESS: http://pyroscope:4040
+      # PYROSCOPE_PROFILING_ENABLED: "1"
+      # PYROSCOPE_PROFILING_WALLTIME_ENABLED: "1"
+      # CORECLR_ENABLE_PROFILING: "1"
+      # CORECLR_PROFILER: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+      # CORECLR_PROFILER_PATH: /dotnet/Pyroscope.Profiler.Native.so
+      # LD_PRELOAD: /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+      # LD_LIBRARY_PATH: /dotnet
+      # DOTNET_EnableDiagnostics: "1"
+      # DOTNET_EnableDiagnostics_IPC: "0"
+      # DOTNET_EnableDiagnostics_Debugger: "0"
+      # DOTNET_EnableDiagnostics_Profiler: "1"
     depends_on:
       database-migrator:
         condition: service_healthy
@@ -189,8 +192,8 @@ services:
         condition: service_healthy
       otel-collector:
         condition: service_started
-      pyroscope:
-        condition: service_started
+      # pyroscope:
+        # condition: service_started
     ports:
       - "8083:8080"
     healthcheck:
@@ -245,67 +248,79 @@ services:
     ports:
       - "3001:3000"
 
-  prometheus:
-    image: prom/prometheus:v3.4.1
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
+  # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
+  # prometheus:
+    # image: prom/prometheus:v3.4.1
+    # command:
+      # - --config.file=/etc/prometheus/prometheus.yml
+    # volumes:
+      # - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    # ports:
+      # - "9090:9090"
 
-  tempo:
-    image: grafana/tempo:2.8.1
-    command:
-      - -config.file=/etc/tempo.yml
-    volumes:
-      - ./observability/tempo/tempo.yml:/etc/tempo.yml:ro
-    ports:
-      - "3200:3200"
+  # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
+  # tempo:
+    # image: grafana/tempo:2.8.1
+    # command:
+      # - -config.file=/etc/tempo.yml
+    # volumes:
+      # - ./observability/tempo/tempo.yml:/etc/tempo.yml:ro
+    # ports:
+      # - "3200:3200"
 
-  loki:
-    image: grafana/loki:3.5.0
-    command:
-      - -config.file=/etc/loki/loki.yml
-    volumes:
-      - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
-    ports:
-      - "3100:3100"
+  # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
+  # loki:
+    # image: grafana/loki:3.5.0
+    # command:
+      # - -config.file=/etc/loki/loki.yml
+    # volumes:
+      # - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
+    # ports:
+      # - "3100:3100"
 
-  pyroscope:
-    image: grafana/pyroscope:latest
-    ports:
-      - "4040:4040"
+  # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
+  # pyroscope:
+    # image: grafana/pyroscope:latest
+    # ports:
+      # - "4040:4040"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command:
       - --config=/etc/otel-collector/config.yml
+    environment:
+      # Grafana Cloud OTLP gateway, e.g. https://otlp-gateway-prod-eu-west-2.grafana.net/otlp
+      GRAFANA_CLOUD_OTLP_ENDPOINT: ${GRAFANA_CLOUD_OTLP_ENDPOINT}
+      # Numeric stack id from the Grafana Cloud OTLP "Send traces/logs/metrics" page
+      GRAFANA_CLOUD_INSTANCE_ID: ${GRAFANA_CLOUD_INSTANCE_ID}
+      # Cloud Access Policy token with metrics:write, logs:write and traces:write
+      GRAFANA_CLOUD_API_TOKEN: ${GRAFANA_CLOUD_API_TOKEN}
     volumes:
       - ./observability/otel-collector/otel-collector.yml:/etc/otel-collector/config.yml:ro
-    depends_on:
-      - tempo
-      - loki
+    # depends_on:
+      # - tempo
+      # - loki
     ports:
       - "4317:4317"
       - "4318:4318"
 
-  grafana:
-    image: grafana/grafana:12.0.0
-    depends_on:
-      - prometheus
-      - tempo
-      - loki
-      - pyroscope
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_PLUGINS_PREINSTALL_SYNC: grafana-pyroscope-app
-    volumes:
-      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    ports:
-      - "3000:3000"
+  # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
+  # grafana:
+    # image: grafana/grafana:12.0.0
+    # depends_on:
+      # - prometheus
+      # - tempo
+      # - loki
+      # - pyroscope
+    # environment:
+      # GF_SECURITY_ADMIN_USER: admin
+      # GF_SECURITY_ADMIN_PASSWORD: admin
+      # GF_PLUGINS_PREINSTALL_SYNC: grafana-pyroscope-app
+    # volumes:
+      # - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      # - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    # ports:
+      # - "3000:3000"
 
 secrets:
   GITHUB_USERNAME:
