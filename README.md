@@ -121,6 +121,48 @@ Useful endpoints:
 
 The `consumer` and `jobs` containers expose internal `/health/readiness` and `/health/liveness` endpoints for orchestration. In `docker compose`, both services wait for the database migrator to complete successfully before starting.
 
+## Sandbox and Staging Deployment
+
+Both run with `ASPNETCORE_ENVIRONMENT=Container`, which layers `appsettings.Container.json` over
+`appsettings.json`. Deployment-specific values are supplied as environment variables so nothing
+environment-specific is committed.
+
+### Reverse proxy headers
+
+The client IP partitions every rate-limit policy and is recorded against sessions. Behind an ingress
+the connection address is the proxy's, so without forwarded-header processing every caller shares one
+partition and the anonymous rate limit throttles all traffic collectively.
+`appsettings.Container.json` enables it.
+
+| Variable | Container default | Notes |
+|---|---|---|
+| `ForwardedHeaders__Enabled` | `true` | Disable only when nothing fronts the service. |
+| `ForwardedHeaders__TrustAnyProxy` | `true` | Accepts `X-Forwarded-For` from any peer. Safe only while the ingress is the sole route in. |
+| `ForwardedHeaders__ForwardLimit` | `1` | Proxy hops to unwind, counted from the right of the header. |
+| `ForwardedHeaders__KnownProxies__0` | unset | Pin individual ingress addresses instead of `TrustAnyProxy`. |
+| `ForwardedHeaders__KnownNetworks__0` | unset | Same, in CIDR form such as `10.0.0.0/8`. |
+
+Startup fails when the section is enabled while no proxy is trusted, because the middleware would
+otherwise ignore every forwarded header without saying so.
+
+### Frontend origins
+
+CORS is deny-by-default and the allowlist is empty in committed configuration. Set one variable per
+origin:
+
+    Cors__AllowedOrigins__0=https://staging.app.example
+    Cors__AllowedOrigins__1=https://preview.app.example
+
+An empty allowlist is a valid server-to-server deployment, so it logs a warning at startup rather
+than failing — an unset variable and a deliberate empty list look identical otherwise.
+
+### Client onboarding
+
+`Clients:Onboarding:DefaultClientId` in `appsettings.json` holds the default client the post-deploy
+seeder creates. Sign-up attaches new stakeholders to it, and startup fails when the value is missing
+so a mis-seeded database is caught at deploy time instead of on the first registration. Override with
+`Clients__Onboarding__DefaultClientId` when a deployment seeds a different client.
+
 ## Profiling
 
 The local observability stack includes Grafana Pyroscope for continuous profiling.

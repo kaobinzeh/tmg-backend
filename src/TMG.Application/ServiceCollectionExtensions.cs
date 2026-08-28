@@ -55,7 +55,19 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ClientOnboardingOptions>(configuration.GetSection(ClientOnboardingOptions.SectionName));
+        var onboardingSection = configuration.GetSection(ClientOnboardingOptions.SectionName);
+
+        // Sign-up resolves this lazily, so an unset value would surface as a 500 on the first
+        // registration rather than a failed deployment.
+        var defaultClientId = onboardingSection.Get<ClientOnboardingOptions>()?.DefaultClientId;
+        if (defaultClientId is null || defaultClientId == Guid.Empty)
+        {
+            throw new InvalidOperationException(
+                $"'{ClientOnboardingOptions.SectionName}:{nameof(ClientOnboardingOptions.DefaultClientId)}' must be configured " +
+                "with the seeded default client id before sign-up can attach new stakeholders to a client.");
+        }
+
+        services.Configure<ClientOnboardingOptions>(onboardingSection);
 
         return services.AddApplication();
     }
