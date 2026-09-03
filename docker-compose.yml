@@ -236,17 +236,19 @@ services:
       timeout: 5s
       retries: 12
 
-  rabbitscout:
-    image: ghcr.io/ralve-org/rabbitscout:latest
-    environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 15672
-      RABBITMQ_PROTOCOL: http
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    ports:
-      - "3001:3000"
+  # Disabled: unauthenticated RabbitMQ admin UI, unsafe to publish on a deployed host.
+  # Uncomment for local use only; RabbitMQ's own management UI is on port 15672.
+  # rabbitscout:
+    # image: ghcr.io/ralve-org/rabbitscout:latest
+    # environment:
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_PORT: 15672
+      # RABBITMQ_PROTOCOL: http
+    # depends_on:
+      # rabbitmq:
+        # condition: service_healthy
+    # ports:
+      # - "3001:3000"
 
   # Disabled: telemetry now ships to Grafana Cloud via the OTel collector.
   # prometheus:

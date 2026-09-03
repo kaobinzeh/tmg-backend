@@ -1,0 +1,213 @@
+# Server deployment stack.
+#
+# Differs from the repository's root docker-compose.yml in four ways:
+#   * pulls published images from GHCR instead of building from source
+#     (a .NET SDK build would exhaust a 4 GB VPS)
+#   * Postgres, RabbitMQ and Redis have named volumes, so data survives recreate
+#   * every service restarts on its own after a crash or reboot
+#   * only the API is published publicly; datastores bind to 127.0.0.1
+#
+# Usage:  docker compose --env-file .env up -d
+name: tmg
+
+services:
+  database-migrator:
+    image: ghcr.io/kaobinzeh/tmg-migrator:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+
+  webapi:
+    image: ghcr.io/kaobinzeh/tmg-webapi:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Container
+      ASPNETCORE_URLS: http://+:8080
+      # This deployment has no reverse proxy, so forwarded headers stay OFF.
+      # appsettings.Container.json enables them with TrustAnyProxy, which is only
+      # safe when an ingress is the sole route in. Published directly, that would
+      # let any caller spoof X-Forwarded-For and defeat per-IP rate limiting.
+      # Set to "true" once Caddy/nginx fronts this service.
+      ForwardedHeaders__Enabled: "false"
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__Redis: redis:6379
+      Jwt__Issuer: ${JWT_ISSUER:-TMG}
+      Jwt__Audience: ${JWT_AUDIENCE:-TMG.Clients}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      # One variable per allowed browser origin. Delete this line if no browser
+      # frontend calls the API directly — an empty value is not a valid origin.
+      Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN_0}
+      Notifications__Email__FromAddress: ${MAIL_FROM_ADDRESS}
+      Notifications__Email__FromName: ${MAIL_FROM_NAME}
+      Notifications__Email__Mailtrap__WebhookSigningSecret: ${MAILTRAP_WEBHOOK_SIGNING_SECRET}
+      OpenTelemetry__ServiceName: TMG.WebAPI
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+      Database__InitializeOnStartup: "false"
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+    ports:
+      # Host port 80 -> container 8080, so the API answers on http://<server-ip>/
+      - "80:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  consumer:
+    image: ghcr.io/kaobinzeh/tmg-consumer:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__Redis: redis:6379
+      Messaging__RabbitMq__ServiceName: TMG.Consumer
+      Messaging__RabbitMq__HostName: rabbitmq
+      Messaging__RabbitMq__Port: 5672
+      Messaging__RabbitMq__UserName: ${RABBITMQ_USER}
+      Messaging__RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      Messaging__RabbitMq__VirtualHost: /
+      Messaging__RabbitMq__EventsExchange: x.events.tmg
+      Messaging__RabbitMq__CommandsExchange: x.commands.tmg
+      Notifications__Email__FromAddress: ${MAIL_FROM_ADDRESS}
+      Notifications__Email__FromName: ${MAIL_FROM_NAME}
+      Notifications__Email__Mailtrap__ApiToken: ${MAILTRAP_TOKEN}
+      OpenTelemetry__ServiceName: TMG.Consumer
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  jobs:
+    image: ghcr.io/kaobinzeh/tmg-jobs:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgresWrite: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__PostgresRead: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      ConnectionStrings__Redis: redis:6379
+      Messaging__RabbitMq__ServiceName: TMG.Jobs
+      Messaging__RabbitMq__HostName: rabbitmq
+      Messaging__RabbitMq__Port: 5672
+      Messaging__RabbitMq__UserName: ${RABBITMQ_USER}
+      Messaging__RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      Messaging__RabbitMq__VirtualHost: /
+      Messaging__RabbitMq__EventsExchange: x.events.tmg
+      Messaging__RabbitMq__CommandsExchange: x.commands.tmg
+      OpenTelemetry__ServiceName: TMG.Jobs
+      OpenTelemetry__OtlpEndpoint: http://otel-collector:4317
+    depends_on:
+      database-migrator:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Localhost only. Reach it with: ssh -L 5432:localhost:5432 <user>@<server-ip>
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      # AMQP (5672) is not published at all — only containers on this network need it.
+      # Management UI is localhost only: ssh -L 15672:localhost:15672 <user>@<server-ip>
+      - "127.0.0.1:15672:15672"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    command:
+      - --config=/etc/otel-collector/config.yml
+    volumes:
+      - ../observability/otel-collector/otel-collector.yml:/etc/otel-collector/config.yml:ro
+    environment:
+      GRAFANA_CLOUD_OTLP_ENDPOINT: ${GRAFANA_CLOUD_OTLP_ENDPOINT}
+      GRAFANA_CLOUD_INSTANCE_ID: ${GRAFANA_CLOUD_INSTANCE_ID}
+      GRAFANA_CLOUD_API_TOKEN: ${GRAFANA_CLOUD_API_TOKEN}
+    # No published ports: apps reach it in-network at otel-collector:4317, and it
+    # scrapes webapi:8080/metrics and consumer:8080/metrics the same way.
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
