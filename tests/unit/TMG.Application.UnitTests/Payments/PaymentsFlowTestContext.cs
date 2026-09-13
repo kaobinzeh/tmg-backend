@@ -1,4 +1,5 @@
 using TMG.Application.Payments.Features.ActivatePaymentProvider;
+using TMG.Application.Payments.Features.GetStakeholderWalletBalances;
 using TMG.Application.Payments.Features.GetStakeholderWalletTopUpTransactionDetail;
 using TMG.Application.Payments.Features.GetStakeholderWalletTransactions;
 using TMG.Application.Payments.Features.InitiatePayment;
@@ -28,6 +29,7 @@ internal sealed class PaymentsFlowTestContext
     public IRepository<Unit> UnitRepository { get; } = Substitute.For<IRepository<Unit>>();
     public IRepository<PaymentWebhookInbox> PaymentWebhookInboxRepository { get; } = Substitute.For<IRepository<PaymentWebhookInbox>>();
     public IWalletTransactionReadModelRepository WalletTransactionReadModelRepository { get; } = Substitute.For<IWalletTransactionReadModelRepository>();
+    public IWalletReadModelRepository WalletReadModelRepository { get; } = Substitute.For<IWalletReadModelRepository>();
     public ICustomTelemetryContext CustomTelemetryContext { get; } = Substitute.For<ICustomTelemetryContext>();
     public IEventPublisher EventPublisher { get; } = Substitute.For<IEventPublisher>();
     public IUnitOfWork UnitOfWork { get; } = Substitute.For<IUnitOfWork>();
@@ -54,6 +56,9 @@ internal sealed class PaymentsFlowTestContext
 
     public GetStakeholderWalletTransactionsHandler CreateGetStakeholderWalletTransactionsHandler() =>
         new(WalletTransactionReadModelRepository);
+
+    public GetStakeholderWalletBalancesHandler CreateGetStakeholderWalletBalancesHandler() =>
+        new(WalletReadModelRepository);
 
     public GetStakeholderWalletTopUpTransactionDetailHandler CreateGetStakeholderWalletTopUpTransactionDetailHandler() =>
         new(WalletTransactionReadModelRepository);
