@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>));
         services.AddScoped<IStakeholderReadModelRepository, StakeholderReadModelRepository>();
         services.AddScoped<IWalletTransactionReadModelRepository, WalletTransactionReadModelRepository>();
+        services.AddScoped<IWalletReadModelRepository, WalletReadModelRepository>();
         services.AddScoped<ITenancyReadModelRepository, TenancyReadModelRepository>();
 
         return services;

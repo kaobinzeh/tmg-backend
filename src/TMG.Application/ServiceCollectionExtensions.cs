@@ -11,6 +11,7 @@ using TMG.Application.Authentication.Stakeholders;
 using TMG.Application.Notifications.Features.ProcessMailtrapDeliveryWebhook;
 using TMG.Application.Payments.Features.ActivatePaymentProvider;
 using TMG.Application.Payments.Features.GetStakeholderWalletTopUpTransactionDetail;
+using TMG.Application.Payments.Features.GetStakeholderWalletBalances;
 using TMG.Application.Payments.Features.GetStakeholderWalletTransactions;
 using TMG.Application.Payments.Features.GetPaymentProviders;
 using TMG.Application.Payments.Features.InitiatePayment;
@@ -94,6 +95,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetCurrenciesHandler>();
         services.AddScoped<GetPaymentProvidersHandler>();
         services.AddScoped<InitiatePaymentHandler>();
+        services.AddScoped<GetStakeholderWalletBalancesHandler>();
         services.AddScoped<GetStakeholderWalletTransactionsHandler>();
         services.AddScoped<GetStakeholderWalletTopUpTransactionDetailHandler>();
         services.AddScoped<ProcessSafeHavenAccountCreditWebhookHandler>();
