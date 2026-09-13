@@ -7,6 +7,7 @@ using TMG.Application.Authentication.Features.CompletePasswordReset;
 using TMG.Application.Authentication.Features.LogoutSession;
 using TMG.Application.Authentication.Features.RefreshSession;
 using TMG.Application.Authentication.Features.RequestPasswordReset;
+using TMG.Application.Authentication.Features.ResendSignUpOtp;
 using TMG.Application.Authentication.Features.SignUp;
 using TMG.Application.Authentication.Features.SignUpOtp;
 using TMG.Application.Authentication.Stakeholders;
@@ -64,8 +65,15 @@ internal sealed class AuthenticationFlowTestContext
         CustomTelemetryContext,
         Options.Create(new ClientOnboardingOptions { DefaultClientId = DefaultClientId }),
         UnitOfWork);
+    public ResendSignUpOtpHandler CreateResendSignUpOtpHandler() => new(
+        IdentityService,
+        CommandSender,
+        StakeholderResolver,
+        CustomTelemetryContext,
+        UnitOfWork);
     public SignUpOtpHandler CreateSignUpOtpHandler() => new(
         IdentityService,
+        TwoFactorOtpService,
         EventPublisher,
         StakeholderResolver,
         CustomTelemetryContext,

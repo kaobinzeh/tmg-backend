@@ -7,6 +7,7 @@ using TMG.Infrastructure.Messaging;
 using Chidelu.Integration.Messaging.RabbitMQ.Consumer;
 using Chidelu.Integration.Messaging.RabbitMQ.Consumer.DependencyInjection;
 using ResetPassword = TMG.Contracts.Commands.Authentication.ResetPasswordCommand;
+using SendEmailConfirmationOtp = TMG.Contracts.Commands.Authentication.SendEmailConfirmationOtpCommand;
 using SendNotification = TMG.Contracts.Commands.Notifications.SendNotificationCommand;
 using UserAccessTokenRefreshedEvent = TMG.Contracts.Events.UserAccessTokenRefreshed;
 using UserCreatedEvent = TMG.Contracts.Events.UserCreated;
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSubscribers(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ILoginActivityIpAddressResolver, LoginActivityIpAddressResolver>();
+        services.AddScoped<EmailConfirmationOtpSender>();
 
         var options = configuration
             .GetSection(RabbitMqMessagingOptions.SectionName)
@@ -80,6 +82,7 @@ public static class ServiceCollectionExtensions
                 .AddHandler<TenancyAgreementReadyEvent, TenancyAgreementReadyHandler>())
             .AddConsumer(consumerConfig, builder => builder
                 .AddHandler<ResetPassword, ResetPasswordHandler>()
+                .AddHandler<SendEmailConfirmationOtp, SendEmailConfirmationOtpHandler>()
                 .AddHandler<SendNotification, SendNotificationHandler>()
                 .AddHandler<CreditWalletCommand, CreditWalletHandler>()
                 .AddHandler<ActivateSubscriptionCommand, ActivateSubscriptionHandler>()

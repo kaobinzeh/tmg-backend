@@ -18,6 +18,7 @@ public static class EndpointUrl
     {
         public const string Route = $"api/{Versions.V1Route}/authentication/email-confirmations";
         public static readonly string V1 = ToV1(Route);
+        public static readonly string ResendV1 = $"{V1}/resend";
     }
 
     public static class Sessions

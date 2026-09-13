@@ -6,6 +6,7 @@ using TMG.Application.Authentication.Features.RefreshSession;
 using TMG.Application.Authentication.Features.RequestPasswordReset;
 using TMG.Application.Authentication.Features.SignIn;
 using TMG.Application.Authentication.Features.SignUp;
+using TMG.Application.Authentication.Features.ResendSignUpOtp;
 using TMG.Application.Authentication.Features.SignUpOtp;
 using TMG.Application.Authentication.Stakeholders;
 using TMG.Application.Notifications.Features.ProcessMailtrapDeliveryWebhook;
@@ -82,6 +83,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RefreshSessionHandler>();
         services.AddScoped<SignUpHandler>();
         services.AddScoped<SignUpOtpHandler>();
+        services.AddScoped<ResendSignUpOtpHandler>();
         services.AddScoped<SignInHandler>();
         services.AddScoped<RequestPasswordResetHandler>();
         services.AddScoped<ProcessMailtrapDeliveryWebhookHandler>();

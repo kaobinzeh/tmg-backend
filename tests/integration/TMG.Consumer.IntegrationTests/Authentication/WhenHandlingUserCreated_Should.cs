@@ -122,10 +122,14 @@ public sealed class WhenHandlingUserCreated_Should(ContainersFixture fixture)
 
             using var scope = CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IAppUserRepository>();
-            var identityService = scope.ServiceProvider.GetRequiredService<IAuthenticationIdentityService>();
+            var twoFactorOtpService = scope.ServiceProvider.GetRequiredService<ITwoFactorOtpService>();
             var user = await repository.GetByEmailAsync(_email);
             user.ShouldNotBeNull();
-            (await identityService.VerifySignUpOtpAsync(user, content.Content["OtpCode"])).ShouldBeTrue();
+            (await twoFactorOtpService.ValidateOtpAsync(
+                user.Id,
+                content.Content["OtpCode"],
+                OtpIntent.EmailConfirmation,
+                CancellationToken.None)).ShouldBeTrue();
         }
     }
 

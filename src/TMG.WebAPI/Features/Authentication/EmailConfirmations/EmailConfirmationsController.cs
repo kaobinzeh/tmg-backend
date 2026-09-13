@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using TMG.Application.Authentication.Features.ResendSignUpOtp;
 using TMG.Application.Authentication.Features.SignUpOtp;
 using TMG.Domain.Common.Auditing;
 using TMG.WebAPI.Infrastructure;
@@ -15,7 +16,9 @@ namespace TMG.WebAPI.Features.Authentication.EmailConfirmations;
 [Route(EndpointUrl.EmailConfirmations.Route)]
 public sealed class EmailConfirmationsController(
     SignUpOtpHandler handler,
+    ResendSignUpOtpHandler resendHandler,
     IValidator<SignUpOtpRequest> validator,
+    IValidator<ResendSignUpOtpRequest> resendValidator,
     ICurrentActor currentActor) : ControllerBase
 {
     [HttpPost]
@@ -44,5 +47,28 @@ public sealed class EmailConfirmationsController(
                 title: "Invalid OTP",
                 detail: "The OTP is invalid, expired, or has already been consumed.")
         };
+    }
+
+    [HttpPost("resend")]
+    [ProducesResponseType<ResendSignUpOtpResponse>(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ResendSignUpOtpResponse>> Resend(
+        [FromBody] ResendSignUpOtpRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validationResult = await resendValidator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ValidationProblemDetails(validationResult.ToValidationDictionary()));
+        }
+
+        await resendHandler.HandleAsync(
+            new ResendSignUpOtpCommand(request.Email, ActorContext.FromAnonymousActor(currentActor)),
+            cancellationToken);
+
+        // Every outcome returns the same response so the endpoint cannot be used to probe
+        // which email addresses have accounts, or which of them are already verified.
+        return Accepted((string?)null, new ResendSignUpOtpResponse(
+            "If the account exists and is not yet verified, a new OTP will be sent shortly."));
     }
 }
