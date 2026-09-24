@@ -6,6 +6,7 @@ using TMG.Application.Authentication.Features.GoogleSignUp;
 using TMG.Application.Authentication.Features.LogoutSession;
 using TMG.Application.Authentication.Features.RefreshSession;
 using TMG.Application.Authentication.Features.RequestPasswordReset;
+using TMG.Application.Authentication.Features.ResendSignUpOtp;
 using TMG.Application.Authentication.Features.SignIn;
 using TMG.Application.Authentication.Features.SignUp;
 using TMG.Application.Authentication.Features.SignUpOtp;
@@ -119,8 +120,16 @@ internal sealed class AuthenticationControllerTestContext
         CustomTelemetryContext,
         UnitOfWork);
 
+    public ResendSignUpOtpHandler CreateResendSignUpOtpHandler() => new(
+        IdentityService,
+        CommandSender,
+        StakeholderResolver,
+        CustomTelemetryContext,
+        UnitOfWork);
+
     public SignUpOtpHandler CreateSignUpOtpHandler() => new(
         IdentityService,
+        TwoFactorOtpService,
         EventPublisher,
         StakeholderResolver,
         CustomTelemetryContext,

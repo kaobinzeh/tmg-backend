@@ -72,6 +72,7 @@ public sealed class WhenVerifyingSignUpOtp_Should(ContainersFixture fixture)
         _lastName = WebApiIntegrationTestData.LastName();
         using var scope = CreateScope();
         var identityService = scope.ServiceProvider.GetRequiredService<IAuthenticationIdentityService>();
+        var twoFactorOtpService = scope.ServiceProvider.GetRequiredService<ITwoFactorOtpService>();
         var timeProvider = scope.ServiceProvider.GetRequiredService<TimeProvider>();
         var stakeholderTypeRepository = scope.ServiceProvider.GetRequiredService<IRepository<StakeholderType>>();
         var stakeholderRepository = scope.ServiceProvider.GetRequiredService<IRepository<Stakeholder>>();
@@ -82,7 +83,12 @@ public sealed class WhenVerifyingSignUpOtp_Should(ContainersFixture fixture)
         var createResult = await identityService.CreateAsync(user);
         createResult.Succeeded.ShouldBeTrue();
 
-        _otp = await identityService.GenerateSignUpOtpAsync(user);
+        _otp = (await twoFactorOtpService.GenerateOtpAsync(
+            user.Id,
+            OtpIntent.EmailConfirmation,
+            CancellationToken.None,
+            characterLength: 6,
+            isAlphaNumeric: false)).Code;
 
         var stakeholderType = StakeholderType.Create(_clientId, "Tenant", "tenant");
         var stakeholder = Stakeholder.Create(user.Id, _clientId, _countryId, stakeholderType.Id, _firstName, _lastName);

@@ -128,6 +128,7 @@ public sealed class TwoFactorOtpService(IJsonCache cache, TimeProvider timeProvi
         {
             OtpIntent.PasswordReset => TimeSpan.FromMinutes(2),
             OtpIntent.TenancyInvitation => TimeSpan.FromDays(7),
+            OtpIntent.EmailConfirmation => TimeSpan.FromMinutes(3),
             _ => throw new ArgumentOutOfRangeException(nameof(intent), intent, "Unsupported OTP intent.")
         };
 
@@ -136,6 +137,7 @@ public sealed class TwoFactorOtpService(IJsonCache cache, TimeProvider timeProvi
         {
             OtpIntent.PasswordReset => 5,
             OtpIntent.TenancyInvitation => 10,
+            OtpIntent.EmailConfirmation => 5,
             _ => throw new ArgumentOutOfRangeException(nameof(intent), intent, "Unsupported OTP intent.")
         };
 

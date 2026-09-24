@@ -23,7 +23,12 @@ public sealed class When_VerifyingSignUpOtp_WithAlreadyVerifiedAccount_Should
         validator.ValidateAsync(request, Arg.Any<CancellationToken>()).Returns(new ValidationResult());
         context.IdentityService.FindByEmailAsync(request.Email).Returns(user);
 
-        var sut = new EmailConfirmationsController(context.CreateSignUpOtpHandler(), validator, context.CurrentActor);
+        var sut = new EmailConfirmationsController(
+            context.CreateSignUpOtpHandler(),
+            context.CreateResendSignUpOtpHandler(),
+            validator,
+            Substitute.For<IValidator<ResendSignUpOtpRequest>>(),
+            context.CurrentActor);
 
         var result = await sut.Handle(request, CancellationToken.None);
 

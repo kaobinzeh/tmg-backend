@@ -14,8 +14,6 @@ public interface IAuthenticationIdentityService
     Task<IdentityResult> CreateAsync(AppUser user);
     Task<IdentityResult> CreateAsync(AppUser user, string password);
     Task<IdentityResult> AddLoginAsync(AppUser user, string loginProvider, string providerKey, string displayName);
-    Task<string> GenerateSignUpOtpAsync(AppUser user);
-    Task<bool> VerifySignUpOtpAsync(AppUser user, string otp);
     Task<IdentityResult> ResetPasswordAsync(AppUser user, string newPassword);
     Task<bool> CheckPasswordAsync(AppUser user, string password);
     Task<IdentityResult> AccessFailedAsync(AppUser user);

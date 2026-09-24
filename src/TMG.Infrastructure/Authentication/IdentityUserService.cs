@@ -36,12 +36,6 @@ public sealed class IdentityUserService(UserManager<AppUser> userManager) : IAut
     public Task<IdentityResult> AddLoginAsync(AppUser user, string loginProvider, string providerKey, string displayName) =>
         userManager.AddLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, displayName));
 
-    public Task<string> GenerateSignUpOtpAsync(AppUser user) =>
-        userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
-
-    public Task<bool> VerifySignUpOtpAsync(AppUser user, string otp) =>
-        userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, otp);
-
     public async Task<IdentityResult> ResetPasswordAsync(AppUser user, string newPassword)
     {
         var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);

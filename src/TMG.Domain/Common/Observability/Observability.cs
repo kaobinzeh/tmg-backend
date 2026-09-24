@@ -53,6 +53,8 @@ public static class Observability
             public const string GoogleSignUpCompleted = "GoogleSignUpCompleted";
             public const string GoogleSignUpFailed = "GoogleSignUpFailed";
             public const string EmailConfirmationOtpSent = "EmailConfirmationOtpSent";
+            public const string EmailConfirmationOtpResendRequested = "EmailConfirmationOtpResendRequested";
+            public const string EmailConfirmationOtpResendFailed = "EmailConfirmationOtpResendFailed";
             public const string EmailConfirmationStarted = "EmailConfirmationStarted";
             public const string EmailConfirmationCompleted = "EmailConfirmationCompleted";
             public const string EmailConfirmationFailed = "EmailConfirmationFailed";

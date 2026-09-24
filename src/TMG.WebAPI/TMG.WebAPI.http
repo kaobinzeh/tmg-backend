@@ -23,6 +23,15 @@ Content-Type: application/json
 
 ###
 
+POST {{TMG.WebAPI_HostAddress}}/api/v1/authentication/email-confirmations/resend
+Content-Type: application/json
+
+{
+  "email": "ada@example.com"
+}
+
+###
+
 POST {{TMG.WebAPI_HostAddress}}/api/v1/authentication/sessions
 Content-Type: application/json
 
